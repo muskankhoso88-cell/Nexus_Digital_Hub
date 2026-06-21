@@ -1,0 +1,988 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NEXUS | Security</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      :root {
+        --bg-main: #0a0a0c;
+        --bg-surface: #121216;
+        --bg-surface-elevated: #1a1a22;
+        --border-color: rgba(255, 255, 255, 0.07);
+        --text-primary: #f3f4f6;
+        --text-secondary: #9ca3af;
+        --accent-blue: #0d6efd;
+        --accent-green: #10b981;
+        --accent-orange: #f59e0b;
+        --accent-red: #ef4444;
+        --accent-purple: #8b5cf6;
+        --glass-bg: rgba(18, 18, 22, 0.85);
+        --shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        --transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        --sidebar-width: 240px;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: var(--bg-main);
+        color: var(--text-primary);
+        min-height: 100vh;
+        display: flex;
+      }
+      .sidebar {
+        width: var(--sidebar-width);
+        min-height: 100vh;
+        background: var(--bg-surface);
+        border-right: 1px solid var(--border-color);
+        position: fixed;
+        top: 0;
+        left: 0;
+        display: flex;
+        flex-direction: column;
+        padding: 24px 0;
+        z-index: 999;
+      }
+      .sidebar-logo {
+        padding: 0 24px 32px;
+        font-size: 1.4rem;
+        font-weight: 800;
+        letter-spacing: 2px;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 16px;
+      }
+      .sidebar-logo span {
+        color: var(--accent-blue);
+      }
+      .sidebar-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--text-secondary);
+        padding: 8px 24px;
+        margin-bottom: 4px;
+      }
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 24px;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
+        border-left: 3px solid transparent;
+      }
+      .nav-item:hover {
+        background: var(--bg-surface-elevated);
+        color: var(--text-primary);
+      }
+      .nav-item.active {
+        color: var(--accent-blue);
+        border-left-color: var(--accent-blue);
+        background: rgba(13, 110, 253, 0.08);
+      }
+      .nav-item i {
+        width: 18px;
+        text-align: center;
+      }
+      .sidebar-divider {
+        border: none;
+        border-top: 1px solid var(--border-color);
+        margin: 16px 0;
+      }
+      .topbar {
+        position: fixed;
+        top: 0;
+        left: var(--sidebar-width);
+        right: 0;
+        height: 64px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 32px;
+        z-index: 998;
+      }
+      .topbar-title {
+        font-size: 1rem;
+        font-weight: 600;
+      }
+      .avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #0d6efd, #8b5cf6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+      }
+      .main-content {
+        margin-left: var(--sidebar-width);
+        margin-top: 64px;
+        padding: 32px;
+        flex: 1;
+      }
+      .page-header {
+        margin-bottom: 28px;
+      }
+      .page-header h1 {
+        font-size: 1.6rem;
+        font-weight: 700;
+      }
+      .page-header p {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-top: 4px;
+      }
+      .card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 24px;
+      }
+      .card-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .sec-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-bottom: 24px;
+      }
+
+      /* PASSWORD METER */
+      .form-group {
+        margin-bottom: 16px;
+        position: relative;
+      }
+      .form-group label {
+        display: block;
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+      }
+      .form-group input {
+        width: 100%;
+        background: var(--bg-surface-elevated);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 10px 40px 10px 14px;
+        color: var(--text-primary);
+        font-size: 0.88rem;
+        font-family: inherit;
+      }
+      .form-group input:focus {
+        outline: none;
+        border-color: var(--accent-blue);
+      }
+      .toggle-eye {
+        position: absolute;
+        right: 14px;
+        top: 38px;
+        cursor: pointer;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+      }
+      .strength-bar-bg {
+        height: 6px;
+        background: var(--bg-surface-elevated);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 10px;
+        margin-bottom: 8px;
+      }
+      .strength-bar-fill {
+        height: 100%;
+        width: 0%;
+        transition: var(--transition);
+        border-radius: 4px;
+      }
+      .strength-label {
+        font-size: 0.78rem;
+        font-weight: 600;
+      }
+      .req-list {
+        margin-top: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .req-item {
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .req-item.met {
+        color: var(--accent-green);
+      }
+      .req-item i {
+        width: 14px;
+        font-size: 0.7rem;
+      }
+
+      .btn-primary {
+        padding: 10px 20px;
+        background: var(--accent-blue);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: var(--transition);
+      }
+      .btn-primary:hover {
+        background: #0b5ed7;
+      }
+      .btn-primary:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+      .btn-outline {
+        padding: 10px 20px;
+        background: transparent;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+      .btn-outline:hover {
+        border-color: var(--text-primary);
+        color: var(--text-primary);
+      }
+
+      /* 2FA */
+      .twofa-status {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px;
+        background: var(--bg-surface-elevated);
+        border-radius: 10px;
+        margin-bottom: 18px;
+      }
+      .twofa-status-text {
+        font-size: 0.85rem;
+      }
+      .twofa-status-text strong {
+        display: block;
+        font-size: 0.9rem;
+        margin-bottom: 2px;
+      }
+      .switch {
+        position: relative;
+        width: 46px;
+        height: 26px;
+        flex-shrink: 0;
+      }
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .slider-toggle {
+        position: absolute;
+        cursor: pointer;
+        inset: 0;
+        background: var(--border-color);
+        border-radius: 26px;
+        transition: var(--transition);
+      }
+      .slider-toggle::before {
+        content: "";
+        position: absolute;
+        height: 20px;
+        width: 20px;
+        left: 3px;
+        bottom: 3px;
+        background: white;
+        border-radius: 50%;
+        transition: var(--transition);
+      }
+      input:checked + .slider-toggle {
+        background: var(--accent-green);
+      }
+      input:checked + .slider-toggle::before {
+        transform: translateX(20px);
+      }
+
+      .otp-row {
+        display: flex;
+        gap: 10px;
+        margin: 16px 0;
+      }
+      .otp-box {
+        width: 48px;
+        height: 56px;
+        text-align: center;
+        font-size: 1.3rem;
+        font-weight: 700;
+        background: var(--bg-surface-elevated);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: var(--text-primary);
+      }
+      .otp-box:focus {
+        outline: none;
+        border-color: var(--accent-blue);
+      }
+      .otp-timer {
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+        margin-top: 4px;
+      }
+      .otp-timer span {
+        color: var(--accent-blue);
+        font-weight: 600;
+      }
+
+      /* ROLE SWITCH */
+      .role-options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        margin-bottom: 18px;
+      }
+      .role-card {
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 18px;
+        cursor: pointer;
+        transition: var(--transition);
+        text-align: center;
+      }
+      .role-card:hover {
+        border-color: var(--accent-blue);
+      }
+      .role-card.selected {
+        border-color: var(--accent-blue);
+        background: rgba(13, 110, 253, 0.08);
+      }
+      .role-card i {
+        font-size: 1.6rem;
+        margin-bottom: 8px;
+        color: var(--accent-blue);
+      }
+      .role-card h4 {
+        font-size: 0.9rem;
+        margin-bottom: 4px;
+      }
+      .role-card p {
+        font-size: 0.72rem;
+        color: var(--text-secondary);
+      }
+
+      .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.85rem;
+      }
+      .activity-item:last-child {
+        border-bottom: none;
+      }
+      .activity-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        flex-shrink: 0;
+      }
+      .activity-info {
+        flex: 1;
+      }
+      .activity-info h5 {
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+      .activity-info p {
+        font-size: 0.72rem;
+        color: var(--text-secondary);
+      }
+
+      .toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: var(--bg-surface-elevated);
+        border: 1px solid var(--accent-green);
+        border-radius: 10px;
+        padding: 14px 20px;
+        font-size: 0.85rem;
+        color: var(--accent-green);
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        gap: 10px;
+        box-shadow: var(--shadow);
+      }
+      .toast.show {
+        display: flex;
+      }
+      @media (max-width: 900px) {
+        .sec-layout {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="sidebar-logo"><span>N</span>EXUS</div>
+      <div class="sidebar-label">Main</div>
+      <a class="nav-item" href="dashboard.html"
+        ><i class="fas fa-th-large"></i> Dashboard</a
+      >
+      <a class="nav-item" href="calendar.html"
+        ><i class="fas fa-calendar-alt"></i> Calendar</a
+      >
+      <a class="nav-item" href="video.html"
+        ><i class="fas fa-video"></i> Video Calls</a
+      >
+      <a class="nav-item" href="documents.html"
+        ><i class="fas fa-file-contract"></i> Documents</a
+      >
+      <hr class="sidebar-divider" />
+      <div class="sidebar-label">Finance</div>
+      <a class="nav-item" href="payments.html"
+        ><i class="fas fa-credit-card"></i> Payments</a
+      >
+      <a class="nav-item active" href="security.html"
+        ><i class="fas fa-shield-alt"></i> Security</a
+      >
+      <hr class="sidebar-divider" />
+    </aside>
+
+    <header class="topbar">
+      <div class="topbar-title">Security</div>
+      <div class="avatar">U</div>
+    </header>
+
+    <main class="main-content">
+      <div class="page-header">
+        <h1>Security & Access Control</h1>
+        <p>Manage your password, two-factor authentication, and role.</p>
+      </div>
+
+      <div class="sec-layout">
+        <!-- PASSWORD -->
+        <div class="card">
+          <div class="card-title">
+            <i class="fas fa-key" style="color: var(--accent-blue)"></i> Change
+            Password
+          </div>
+
+          <div class="form-group">
+            <label>Current Password</label>
+            <input
+              type="password"
+              id="currentPw"
+              placeholder="Enter current password"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>New Password</label>
+            <input
+              type="password"
+              id="newPw"
+              placeholder="Enter new password"
+              oninput="checkStrength()"
+            />
+            <i
+              class="fas fa-eye toggle-eye"
+              onclick="togglePw('newPw', this)"
+            ></i>
+          </div>
+
+          <div class="strength-bar-bg">
+            <div class="strength-bar-fill" id="strengthBar"></div>
+          </div>
+          <div
+            class="strength-label"
+            id="strengthLabel"
+            style="color: var(--text-secondary)"
+          >
+            Enter a password
+          </div>
+
+          <div class="req-list" id="reqList">
+            <div class="req-item" id="reqLength">
+              <i class="fas fa-circle"></i> At least 8 characters
+            </div>
+            <div class="req-item" id="reqUpper">
+              <i class="fas fa-circle"></i> One uppercase letter
+            </div>
+            <div class="req-item" id="reqNumber">
+              <i class="fas fa-circle"></i> One number
+            </div>
+            <div class="req-item" id="reqSpecial">
+              <i class="fas fa-circle"></i> One special character
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top: 16px">
+            <label>Confirm New Password</label>
+            <input
+              type="password"
+              id="confirmPw"
+              placeholder="Re-enter new password"
+            />
+          </div>
+
+          <button class="btn-primary" onclick="updatePassword()">
+            <i class="fas fa-check"></i> Update Password
+          </button>
+        </div>
+
+        <!-- 2FA -->
+        <div class="card">
+          <div class="card-title">
+            <i
+              class="fas fa-mobile-alt"
+              style="color: var(--accent-purple)"
+            ></i>
+            Two-Factor Authentication
+          </div>
+
+          <div class="twofa-status">
+            <div class="twofa-status-text">
+              <strong id="twofaStatusText">2FA is Disabled</strong>
+              <span style="color: var(--text-secondary)"
+                >Add an extra layer of security</span
+              >
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="twofaToggle" onchange="toggle2FA()" />
+              <span class="slider-toggle"></span>
+            </label>
+          </div>
+
+          <div id="otpSection" style="display: none">
+            <p
+              style="
+                font-size: 0.82rem;
+                color: var(--text-secondary);
+                margin-bottom: 6px;
+              "
+            >
+              Enter the 6-digit code sent to
+              <strong style="color: var(--text-primary)"
+                >+92 3•• ••• 4521</strong
+              >
+            </p>
+            <div class="otp-row">
+              <input
+                type="text"
+                maxlength="1"
+                class="otp-box"
+                oninput="moveNext(this, 0)"
+              />
+              <input
+                type="text"
+                maxlength="1"
+                class="otp-box"
+                oninput="moveNext(this, 1)"
+              />
+              <input
+                type="text"
+                maxlength="1"
+                class="otp-box"
+                oninput="moveNext(this, 2)"
+              />
+              <input
+                type="text"
+                maxlength="1"
+                class="otp-box"
+                oninput="moveNext(this, 3)"
+              />
+              <input
+                type="text"
+                maxlength="1"
+                class="otp-box"
+                oninput="moveNext(this, 4)"
+              />
+              <input
+                type="text"
+                maxlength="1"
+                class="otp-box"
+                oninput="moveNext(this, 5)"
+              />
+            </div>
+            <div class="otp-timer">
+              Code expires in <span id="otpTimer">00:30</span> ·
+              <a
+                href="#"
+                onclick="resendOtp(event)"
+                style="color: var(--accent-blue)"
+                >Resend</a
+              >
+            </div>
+            <button
+              class="btn-primary"
+              style="margin-top: 16px"
+              onclick="verifyOtp()"
+            >
+              <i class="fas fa-shield-check"></i> Verify & Enable
+            </button>
+          </div>
+
+          <div id="twofaEnabledMsg" style="display: none">
+            <div style="text-align: center; padding: 20px 0">
+              <i
+                class="fas fa-check-circle"
+                style="
+                  font-size: 2.2rem;
+                  color: var(--accent-green);
+                  margin-bottom: 10px;
+                  display: block;
+                "
+              ></i>
+              <p style="font-size: 0.9rem; font-weight: 600">2FA is Active</p>
+              <p
+                style="
+                  font-size: 0.78rem;
+                  color: var(--text-secondary);
+                  margin-top: 4px;
+                "
+              >
+                Your account is now protected with OTP verification.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec-layout">
+        <!-- ROLE -->
+        <div class="card">
+          <div class="card-title">
+            <i class="fas fa-user-tag" style="color: var(--accent-green)"></i>
+            Account Role
+          </div>
+          <div class="role-options">
+            <div
+              class="role-card"
+              id="roleInvestor"
+              onclick="selectRole('investor')"
+            >
+              <i class="fas fa-chart-line"></i>
+              <h4>Investor</h4>
+              <p>Browse deals, fund startups, track portfolio</p>
+            </div>
+            <div
+              class="role-card"
+              id="roleEntrepreneur"
+              onclick="selectRole('entrepreneur')"
+            >
+              <i class="fas fa-lightbulb"></i>
+              <h4>Entrepreneur</h4>
+              <p>Pitch ideas, manage funding rounds</p>
+            </div>
+          </div>
+          <button
+            class="btn-outline"
+            style="width: 100%; justify-content: center; display: flex"
+            onclick="saveRole()"
+          >
+            <i class="fas fa-save"></i> Save Role
+          </button>
+        </div>
+
+        <!-- ACTIVITY -->
+        <div class="card">
+          <div class="card-title">
+            <i class="fas fa-history" style="color: var(--accent-orange)"></i>
+            Recent Login Activity
+          </div>
+          <div class="activity-item">
+            <div
+              class="activity-icon"
+              style="
+                background: rgba(16, 185, 129, 0.12);
+                color: var(--accent-green);
+              "
+            >
+              <i class="fas fa-laptop"></i>
+            </div>
+            <div class="activity-info">
+              <h5>Windows · Chrome</h5>
+              <p>Karachi, PK · Just now</p>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div
+              class="activity-icon"
+              style="
+                background: rgba(13, 110, 253, 0.12);
+                color: var(--accent-blue);
+              "
+            >
+              <i class="fas fa-mobile-alt"></i>
+            </div>
+            <div class="activity-info">
+              <h5>iPhone · Safari</h5>
+              <p>Karachi, PK · Yesterday, 8:14 PM</p>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div
+              class="activity-icon"
+              style="
+                background: rgba(245, 158, 11, 0.12);
+                color: var(--accent-orange);
+              "
+            >
+              <i class="fas fa-laptop"></i>
+            </div>
+            <div class="activity-info">
+              <h5>MacOS · Chrome</h5>
+              <p>Lahore, PK · Jun 18, 6:02 PM</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div class="toast" id="toast">
+      <i class="fas fa-check-circle"></i>
+      <span id="toastMsg">Updated successfully!</span>
+    </div>
+
+    <script>
+      // ── PASSWORD STRENGTH ──────────────────────────
+      function togglePw(id, icon) {
+        const input = document.getElementById(id);
+        const isPw = input.type === "password";
+        input.type = isPw ? "text" : "password";
+        icon.className = isPw
+          ? "fas fa-eye-slash toggle-eye"
+          : "fas fa-eye toggle-eye";
+      }
+
+      function checkStrength() {
+        const pw = document.getElementById("newPw").value;
+        let score = 0;
+
+        const hasLength = pw.length >= 8;
+        const hasUpper = /[A-Z]/.test(pw);
+        const hasNumber = /[0-9]/.test(pw);
+        const hasSpecial = /[^A-Za-z0-9]/.test(pw);
+
+        [hasLength, hasUpper, hasNumber, hasSpecial].forEach(
+          (c) => c && score++,
+        );
+
+        setReq("reqLength", hasLength);
+        setReq("reqUpper", hasUpper);
+        setReq("reqNumber", hasNumber);
+        setReq("reqSpecial", hasSpecial);
+
+        const bar = document.getElementById("strengthBar");
+        const label = document.getElementById("strengthLabel");
+
+        const levels = [
+          {
+            width: "0%",
+            color: "var(--border-color)",
+            text: "Enter a password",
+            textColor: "var(--text-secondary)",
+          },
+          {
+            width: "25%",
+            color: "var(--accent-red)",
+            text: "Weak",
+            textColor: "var(--accent-red)",
+          },
+          {
+            width: "50%",
+            color: "var(--accent-orange)",
+            text: "Fair",
+            textColor: "var(--accent-orange)",
+          },
+          {
+            width: "75%",
+            color: "#eab308",
+            text: "Good",
+            textColor: "#eab308",
+          },
+          {
+            width: "100%",
+            color: "var(--accent-green)",
+            text: "Strong",
+            textColor: "var(--accent-green)",
+          },
+        ];
+
+        const lvl = pw.length === 0 ? levels[0] : levels[score];
+        bar.style.width = lvl.width;
+        bar.style.background = lvl.color;
+        label.textContent = lvl.text;
+        label.style.color = lvl.textColor;
+      }
+
+      function setReq(id, met) {
+        const el = document.getElementById(id);
+        el.classList.toggle("met", met);
+        el.querySelector("i").className = met
+          ? "fas fa-check-circle"
+          : "fas fa-circle";
+      }
+
+      function updatePassword() {
+        const current = document.getElementById("currentPw").value;
+        const newPw = document.getElementById("newPw").value;
+        const confirm = document.getElementById("confirmPw").value;
+
+        if (!current || !newPw || !confirm) {
+          alert("Please fill all fields.");
+          return;
+        }
+        if (newPw !== confirm) {
+          alert("Passwords do not match.");
+          return;
+        }
+        if (newPw.length < 8) {
+          alert("Password must be at least 8 characters.");
+          return;
+        }
+
+        showToast("Password updated successfully!");
+        document.getElementById("currentPw").value = "";
+        document.getElementById("newPw").value = "";
+        document.getElementById("confirmPw").value = "";
+        checkStrength();
+      }
+
+      // ── 2FA ────────────────────────────────────────
+      let otpTimerInterval = null;
+
+      function toggle2FA() {
+        const enabled = document.getElementById("twofaToggle").checked;
+        const otpSection = document.getElementById("otpSection");
+        const statusText = document.getElementById("twofaStatusText");
+        const enabledMsg = document.getElementById("twofaEnabledMsg");
+
+        if (enabled) {
+          otpSection.style.display = "block";
+          enabledMsg.style.display = "none";
+          statusText.textContent = "Verifying...";
+          startOtpTimer();
+        } else {
+          otpSection.style.display = "none";
+          enabledMsg.style.display = "none";
+          statusText.textContent = "2FA is Disabled";
+          clearInterval(otpTimerInterval);
+        }
+      }
+
+      function moveNext(el, idx) {
+        const boxes = document.querySelectorAll(".otp-box");
+        if (el.value.length === 1 && idx < boxes.length - 1) {
+          boxes[idx + 1].focus();
+        }
+      }
+
+      function startOtpTimer() {
+        let seconds = 30;
+        clearInterval(otpTimerInterval);
+        otpTimerInterval = setInterval(() => {
+          seconds--;
+          const m = String(Math.floor(seconds / 60)).padStart(2, "0");
+          const s = String(seconds % 60).padStart(2, "0");
+          document.getElementById("otpTimer").textContent = `${m}:${s}`;
+          if (seconds <= 0) clearInterval(otpTimerInterval);
+        }, 1000);
+      }
+
+      function resendOtp(e) {
+        e.preventDefault();
+        startOtpTimer();
+        showToast("New OTP code sent!");
+      }
+
+      function verifyOtp() {
+        const boxes = document.querySelectorAll(".otp-box");
+        const code = Array.from(boxes)
+          .map((b) => b.value)
+          .join("");
+        if (code.length < 6) {
+          alert("Please enter the complete 6-digit code.");
+          return;
+        }
+
+        document.getElementById("otpSection").style.display = "none";
+        document.getElementById("twofaEnabledMsg").style.display = "block";
+        document.getElementById("twofaStatusText").textContent =
+          "2FA is Enabled";
+        clearInterval(otpTimerInterval);
+        showToast("Two-Factor Authentication enabled!");
+      }
+
+      // ── ROLE SELECTION ─────────────────────────────
+      let selectedRole = localStorage.getItem("nexusRole") || "investor";
+
+      function selectRole(role) {
+        selectedRole = role;
+        document
+          .getElementById("roleInvestor")
+          .classList.toggle("selected", role === "investor");
+        document
+          .getElementById("roleEntrepreneur")
+          .classList.toggle("selected", role === "entrepreneur");
+      }
+
+      function saveRole() {
+        localStorage.setItem("nexusRole", selectedRole);
+        showToast(
+          `Role switched to ${selectedRole === "investor" ? "Investor" : "Entrepreneur"}!`,
+        );
+      }
+
+      // ── TOAST ──────────────────────────────────────
+      function showToast(msg) {
+        const t = document.getElementById("toast");
+        document.getElementById("toastMsg").textContent = msg;
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 3000);
+      }
+
+      // ── INIT ───────────────────────────────────────
+      selectRole(selectedRole);
+    </script>
+  </body>
+</html>

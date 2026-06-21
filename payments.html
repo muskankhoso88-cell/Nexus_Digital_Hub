@@ -1,0 +1,913 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NEXUS | Payments</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      :root {
+        --bg-main: #0a0a0c;
+        --bg-surface: #121216;
+        --bg-surface-elevated: #1a1a22;
+        --border-color: rgba(255, 255, 255, 0.07);
+        --text-primary: #f3f4f6;
+        --text-secondary: #9ca3af;
+        --accent-blue: #0d6efd;
+        --accent-green: #10b981;
+        --accent-orange: #f59e0b;
+        --accent-red: #ef4444;
+        --accent-purple: #8b5cf6;
+        --glass-bg: rgba(18, 18, 22, 0.85);
+        --shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        --transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        --sidebar-width: 240px;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: var(--bg-main);
+        color: var(--text-primary);
+        min-height: 100vh;
+        display: flex;
+      }
+      .sidebar {
+        width: var(--sidebar-width);
+        min-height: 100vh;
+        background: var(--bg-surface);
+        border-right: 1px solid var(--border-color);
+        position: fixed;
+        top: 0;
+        left: 0;
+        display: flex;
+        flex-direction: column;
+        padding: 24px 0;
+        z-index: 999;
+      }
+      .sidebar-logo {
+        padding: 0 24px 32px;
+        font-size: 1.4rem;
+        font-weight: 800;
+        letter-spacing: 2px;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 16px;
+      }
+      .sidebar-logo span {
+        color: var(--accent-blue);
+      }
+      .sidebar-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--text-secondary);
+        padding: 8px 24px;
+        margin-bottom: 4px;
+      }
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 24px;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
+        border-left: 3px solid transparent;
+      }
+      .nav-item:hover {
+        background: var(--bg-surface-elevated);
+        color: var(--text-primary);
+      }
+      .nav-item.active {
+        color: var(--accent-blue);
+        border-left-color: var(--accent-blue);
+        background: rgba(13, 110, 253, 0.08);
+      }
+      .nav-item i {
+        width: 18px;
+        text-align: center;
+      }
+      .sidebar-divider {
+        border: none;
+        border-top: 1px solid var(--border-color);
+        margin: 16px 0;
+      }
+      .topbar {
+        position: fixed;
+        top: 0;
+        left: var(--sidebar-width);
+        right: 0;
+        height: 64px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 32px;
+        z-index: 998;
+      }
+      .topbar-title {
+        font-size: 1rem;
+        font-weight: 600;
+      }
+      .avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #0d6efd, #8b5cf6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+      }
+      .main-content {
+        margin-left: var(--sidebar-width);
+        margin-top: 64px;
+        padding: 32px;
+        flex: 1;
+      }
+      .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 28px;
+      }
+      .page-header h1 {
+        font-size: 1.6rem;
+        font-weight: 700;
+      }
+      .page-header p {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-top: 4px;
+      }
+      .btn-primary {
+        padding: 10px 20px;
+        background: var(--accent-blue);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: var(--transition);
+      }
+      .btn-primary:hover {
+        background: #0b5ed7;
+      }
+      .card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 24px;
+      }
+      .card-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      /* WALLET CARD */
+      .wallet-card {
+        background: linear-gradient(135deg, #0d1b3e, #0d6efd 140%);
+        border-radius: 16px;
+        padding: 28px;
+        margin-bottom: 24px;
+        position: relative;
+        overflow: hidden;
+      }
+      .wallet-card::after {
+        content: "";
+        position: absolute;
+        top: -60px;
+        right: -60px;
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.06);
+      }
+      .wallet-label {
+        font-size: 0.78rem;
+        color: rgba(255, 255, 255, 0.7);
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+      }
+      .wallet-balance {
+        font-size: 2.4rem;
+        font-weight: 800;
+        margin: 10px 0 4px;
+      }
+      .wallet-sub {
+        font-size: 0.82rem;
+        color: rgba(255, 255, 255, 0.7);
+      }
+      .wallet-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 24px;
+      }
+      .wallet-btn {
+        flex: 1;
+        padding: 12px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: var(--transition);
+      }
+      .wallet-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      /* STAT CARDS */
+      .stats-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+      .stat-card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 20px;
+      }
+      .stat-card .stat-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 12px;
+        font-size: 0.9rem;
+      }
+      .stat-card .stat-val {
+        font-size: 1.4rem;
+        font-weight: 800;
+      }
+      .stat-card .stat-name {
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+        margin-top: 2px;
+      }
+
+      /* TABLE */
+      .tx-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .tx-table th {
+        text-align: left;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--text-secondary);
+        padding: 10px 8px;
+        border-bottom: 1px solid var(--border-color);
+      }
+      .tx-table td {
+        padding: 14px 8px;
+        font-size: 0.85rem;
+        border-bottom: 1px solid var(--border-color);
+      }
+      .tx-table tr:last-child td {
+        border-bottom: none;
+      }
+      .tx-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        margin-right: 10px;
+      }
+      .tx-amount.positive {
+        color: var(--accent-green);
+        font-weight: 700;
+      }
+      .tx-amount.negative {
+        color: var(--accent-red);
+        font-weight: 700;
+      }
+      .status-label {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.72rem;
+        font-weight: 600;
+      }
+      .status-completed {
+        background: rgba(16, 185, 129, 0.12);
+        color: var(--accent-green);
+      }
+      .status-pending {
+        background: rgba(245, 158, 11, 0.12);
+        color: var(--accent-orange);
+      }
+      .status-failed {
+        background: rgba(239, 68, 68, 0.12);
+        color: var(--accent-red);
+      }
+
+      /* MODAL */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(8px);
+        z-index: 3000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+      .modal-overlay.open {
+        display: flex;
+      }
+      .modal {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 28px;
+        width: 100%;
+        max-width: 420px;
+      }
+      .modal h3 {
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .form-group {
+        margin-bottom: 14px;
+      }
+      .form-group label {
+        display: block;
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+      }
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        background: var(--bg-surface-elevated);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 10px 14px;
+        color: var(--text-primary);
+        font-size: 0.88rem;
+        font-family: inherit;
+      }
+      .form-group input:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: var(--accent-blue);
+      }
+      .card-input-row {
+        display: flex;
+        gap: 10px;
+      }
+      .card-input-row .form-group {
+        flex: 1;
+      }
+      .modal-footer {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+      }
+      .btn-outline {
+        flex: 1;
+        padding: 10px;
+        background: transparent;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+      .btn-outline:hover {
+        border-color: var(--text-primary);
+        color: var(--text-primary);
+      }
+      .card-preview {
+        background: linear-gradient(135deg, #1a1a22, #2a2a3a);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        font-family: monospace;
+      }
+      .card-preview .num {
+        font-size: 1.1rem;
+        letter-spacing: 2px;
+        margin-bottom: 16px;
+      }
+      .card-preview .meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+      }
+
+      .toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: var(--bg-surface-elevated);
+        border: 1px solid var(--accent-green);
+        border-radius: 10px;
+        padding: 14px 20px;
+        font-size: 0.85rem;
+        color: var(--accent-green);
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        gap: 10px;
+        box-shadow: var(--shadow);
+      }
+      .toast.show {
+        display: flex;
+      }
+      @media (max-width: 800px) {
+        .stats-row {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="sidebar-logo"><span>N</span>EXUS</div>
+      <div class="sidebar-label">Main</div>
+      <a class="nav-item" href="dashboard.html"
+        ><i class="fas fa-th-large"></i> Dashboard</a
+      >
+      <a class="nav-item" href="calendar.html"
+        ><i class="fas fa-calendar-alt"></i> Calendar</a
+      >
+      <a class="nav-item" href="video.html"
+        ><i class="fas fa-video"></i> Video Calls</a
+      >
+      <a class="nav-item" href="documents.html"
+        ><i class="fas fa-file-contract"></i> Documents</a
+      >
+      <hr class="sidebar-divider" />
+      <div class="sidebar-label">Finance</div>
+      <a class="nav-item active" href="payments.html"
+        ><i class="fas fa-credit-card"></i> Payments</a
+      >
+      <a class="nav-item" href="security.html"
+        ><i class="fas fa-shield-alt"></i> Security</a
+      >
+      <hr class="sidebar-divider" />
+    </aside>
+
+    <header class="topbar">
+      <div class="topbar-title">Payments</div>
+      <div class="avatar">U</div>
+    </header>
+
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <h1>Payments & Wallet</h1>
+          <p>Manage deposits, withdrawals, and funding transactions.</p>
+        </div>
+      </div>
+
+      <!-- WALLET -->
+      <div class="wallet-card">
+        <div class="wallet-label">Wallet Balance</div>
+        <div class="wallet-balance" id="walletBalance">$24,580.00</div>
+        <div class="wallet-sub">Available for withdrawal & funding</div>
+        <div class="wallet-actions">
+          <button class="wallet-btn" onclick="openModal('deposit')">
+            <i class="fas fa-arrow-down"></i> Deposit
+          </button>
+          <button class="wallet-btn" onclick="openModal('withdraw')">
+            <i class="fas fa-arrow-up"></i> Withdraw
+          </button>
+          <button class="wallet-btn" onclick="openModal('transfer')">
+            <i class="fas fa-exchange-alt"></i> Transfer
+          </button>
+          <button class="wallet-btn" onclick="openModal('fund')">
+            <i class="fas fa-rocket"></i> Fund Deal
+          </button>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div
+            class="stat-icon"
+            style="
+              background: rgba(16, 185, 129, 0.12);
+              color: var(--accent-green);
+            "
+          >
+            <i class="fas fa-arrow-down"></i>
+          </div>
+          <div class="stat-val" id="statDeposits">$12,400</div>
+          <div class="stat-name">Total Deposits</div>
+        </div>
+        <div class="stat-card">
+          <div
+            class="stat-icon"
+            style="
+              background: rgba(239, 68, 68, 0.12);
+              color: var(--accent-red);
+            "
+          >
+            <i class="fas fa-arrow-up"></i>
+          </div>
+          <div class="stat-val" id="statWithdrawals">$3,200</div>
+          <div class="stat-name">Total Withdrawals</div>
+        </div>
+        <div class="stat-card">
+          <div
+            class="stat-icon"
+            style="
+              background: rgba(13, 110, 253, 0.12);
+              color: var(--accent-blue);
+            "
+          >
+            <i class="fas fa-rocket"></i>
+          </div>
+          <div class="stat-val" id="statFunded">$8,000</div>
+          <div class="stat-name">Funded to Deals</div>
+        </div>
+      </div>
+
+      <!-- TRANSACTIONS -->
+      <div class="card">
+        <div class="card-title">
+          Transaction History
+          <select
+            id="filterSelect"
+            onchange="renderTable()"
+            style="
+              background: var(--bg-surface-elevated);
+              border: 1px solid var(--border-color);
+              color: var(--text-primary);
+              padding: 6px 12px;
+              border-radius: 8px;
+              font-size: 0.78rem;
+            "
+          >
+            <option value="all">All</option>
+            <option value="deposit">Deposits</option>
+            <option value="withdraw">Withdrawals</option>
+            <option value="transfer">Transfers</option>
+            <option value="fund">Funding</option>
+          </select>
+        </div>
+        <table class="tx-table">
+          <thead>
+            <tr>
+              <th>Transaction</th>
+              <th>Sender</th>
+              <th>Receiver</th>
+              <th>Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="txTableBody"></tbody>
+        </table>
+      </div>
+    </main>
+
+    <!-- MODAL -->
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal">
+        <h3 id="modalTitle">
+          <i class="fas fa-arrow-down" style="color: var(--accent-blue)"></i>
+          Deposit Funds
+        </h3>
+
+        <div class="card-preview">
+          <div class="num">•••• •••• •••• 4582</div>
+          <div class="meta"><span>USMAN RAZA</span><span>12/28</span></div>
+        </div>
+
+        <div class="form-group">
+          <label>Amount (USD)</label>
+          <input type="number" id="txAmount" placeholder="e.g. 500" />
+        </div>
+
+        <div id="receiverField" style="display: none" class="form-group">
+          <label>Recipient</label>
+          <select id="txReceiver">
+            <option>TechFlow AI</option>
+            <option>GreenX Energy</option>
+            <option>NovaMed Health</option>
+            <option>Sarah Khan (Investor)</option>
+          </select>
+        </div>
+
+        <div class="card-input-row">
+          <div class="form-group">
+            <label>Method</label>
+            <select id="txMethod">
+              <option>Visa •••• 4582</option>
+              <option>Mastercard •••• 7710</option>
+              <option>Bank Transfer</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-outline" onclick="closeModal()">Cancel</button>
+          <button
+            class="btn-primary"
+            style="flex: 1; justify-content: center"
+            onclick="processTx()"
+          >
+            <i class="fas fa-lock"></i> Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast">
+      <i class="fas fa-check-circle"></i>
+      <span id="toastMsg">Transaction successful!</span>
+    </div>
+
+    <script>
+      let balance = 24580.0;
+      let currentTxType = "deposit";
+
+      let TRANSACTIONS = [
+        {
+          type: "deposit",
+          sender: "Bank Account",
+          receiver: "You",
+          amount: 5000,
+          status: "completed",
+          date: "Today",
+        },
+        {
+          type: "fund",
+          sender: "You",
+          receiver: "TechFlow AI",
+          amount: -8000,
+          status: "completed",
+          date: "Yesterday",
+        },
+        {
+          type: "withdraw",
+          sender: "You",
+          receiver: "Bank Account",
+          amount: -3200,
+          status: "completed",
+          date: "Jun 19",
+        },
+        {
+          type: "transfer",
+          sender: "You",
+          receiver: "Sarah Khan",
+          amount: -500,
+          status: "pending",
+          date: "Jun 18",
+        },
+        {
+          type: "deposit",
+          sender: "Bank Account",
+          receiver: "You",
+          amount: 7400,
+          status: "completed",
+          date: "Jun 15",
+        },
+      ];
+
+      const typeIcons = {
+        deposit: {
+          icon: "fa-arrow-down",
+          bg: "rgba(16,185,129,0.12)",
+          color: "var(--accent-green)",
+        },
+        withdraw: {
+          icon: "fa-arrow-up",
+          bg: "rgba(239,68,68,0.12)",
+          color: "var(--accent-red)",
+        },
+        transfer: {
+          icon: "fa-exchange-alt",
+          bg: "rgba(13,110,253,0.12)",
+          color: "var(--accent-blue)",
+        },
+        fund: {
+          icon: "fa-rocket",
+          bg: "rgba(139,92,246,0.12)",
+          color: "var(--accent-purple)",
+        },
+      };
+      const statusClass = {
+        completed: "status-completed",
+        pending: "status-pending",
+        failed: "status-failed",
+      };
+
+      function renderTable() {
+        const filter = document.getElementById("filterSelect").value;
+        const list =
+          filter === "all"
+            ? TRANSACTIONS
+            : TRANSACTIONS.filter((t) => t.type === filter);
+        const body = document.getElementById("txTableBody");
+
+        body.innerHTML = list
+          .map((t) => {
+            const ic = typeIcons[t.type];
+            return `
+      <tr>
+        <td>
+          <span class="tx-icon" style="background:${ic.bg};color:${ic.color}"><i class="fas ${ic.icon}"></i></span>
+          <span style="text-transform:capitalize">${t.type}</span> · <span style="color:var(--text-secondary);font-size:0.75rem">${t.date}</span>
+        </td>
+        <td>${t.sender}</td>
+        <td>${t.receiver}</td>
+        <td class="tx-amount ${t.amount >= 0 ? "positive" : "negative"}">${t.amount >= 0 ? "+" : ""}$${Math.abs(t.amount).toLocaleString()}</td>
+        <td><span class="status-label ${statusClass[t.status]}">${t.status[0].toUpperCase() + t.status.slice(1)}</span></td>
+      </tr>`;
+          })
+          .join("");
+      }
+
+      function updateStats() {
+        const deposits = TRANSACTIONS.filter(
+          (t) => t.type === "deposit",
+        ).reduce((s, t) => s + t.amount, 0);
+        const withdrawals = TRANSACTIONS.filter(
+          (t) => t.type === "withdraw",
+        ).reduce((s, t) => s + Math.abs(t.amount), 0);
+        const funded = TRANSACTIONS.filter((t) => t.type === "fund").reduce(
+          (s, t) => s + Math.abs(t.amount),
+          0,
+        );
+        document.getElementById("statDeposits").textContent =
+          `$${deposits.toLocaleString()}`;
+        document.getElementById("statWithdrawals").textContent =
+          `$${withdrawals.toLocaleString()}`;
+        document.getElementById("statFunded").textContent =
+          `$${funded.toLocaleString()}`;
+        document.getElementById("walletBalance").textContent =
+          `$${balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+      }
+
+      // ── MODAL ─────────────────────────────────────
+      const titles = {
+        deposit: {
+          icon: "fa-arrow-down",
+          color: "var(--accent-blue)",
+          text: "Deposit Funds",
+        },
+        withdraw: {
+          icon: "fa-arrow-up",
+          color: "var(--accent-red)",
+          text: "Withdraw Funds",
+        },
+        transfer: {
+          icon: "fa-exchange-alt",
+          color: "var(--accent-blue)",
+          text: "Transfer Funds",
+        },
+        fund: {
+          icon: "fa-rocket",
+          color: "var(--accent-purple)",
+          text: "Fund a Deal",
+        },
+      };
+
+      function openModal(type) {
+        currentTxType = type;
+        const t = titles[type];
+        document.getElementById("modalTitle").innerHTML =
+          `<i class="fas ${t.icon}" style="color:${t.color}"></i> ${t.text}`;
+        document.getElementById("receiverField").style.display =
+          type === "transfer" || type === "fund" ? "block" : "none";
+        document.getElementById("txAmount").value = "";
+        document.getElementById("modalOverlay").classList.add("open");
+      }
+
+      function closeModal() {
+        document.getElementById("modalOverlay").classList.remove("open");
+      }
+
+      function processTx() {
+        const amount = parseFloat(document.getElementById("txAmount").value);
+        if (!amount || amount <= 0) {
+          alert("Please enter a valid amount.");
+          return;
+        }
+
+        if (
+          (currentTxType === "withdraw" ||
+            currentTxType === "transfer" ||
+            currentTxType === "fund") &&
+          amount > balance
+        ) {
+          alert("Insufficient wallet balance.");
+          return;
+        }
+
+        const receiver =
+          currentTxType === "transfer" || currentTxType === "fund"
+            ? document.getElementById("txReceiver").value
+            : "You";
+
+        let entry;
+        if (currentTxType === "deposit") {
+          balance += amount;
+          entry = {
+            type: "deposit",
+            sender: "Bank Account",
+            receiver: "You",
+            amount,
+            status: "completed",
+            date: "Just now",
+          };
+        } else if (currentTxType === "withdraw") {
+          balance -= amount;
+          entry = {
+            type: "withdraw",
+            sender: "You",
+            receiver: "Bank Account",
+            amount: -amount,
+            status: "completed",
+            date: "Just now",
+          };
+        } else if (currentTxType === "transfer") {
+          balance -= amount;
+          entry = {
+            type: "transfer",
+            sender: "You",
+            receiver,
+            amount: -amount,
+            status: "pending",
+            date: "Just now",
+          };
+        } else {
+          balance -= amount;
+          entry = {
+            type: "fund",
+            sender: "You",
+            receiver,
+            amount: -amount,
+            status: "completed",
+            date: "Just now",
+          };
+        }
+
+        TRANSACTIONS.unshift(entry);
+        renderTable();
+        updateStats();
+        closeModal();
+        showToast(
+          `${titles[currentTxType].text} of $${amount.toLocaleString()} successful!`,
+        );
+      }
+
+      function showToast(msg) {
+        const t = document.getElementById("toast");
+        document.getElementById("toastMsg").textContent = msg;
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 3000);
+      }
+
+      renderTable();
+      updateStats();
+    </script>
+  </body>
+</html>

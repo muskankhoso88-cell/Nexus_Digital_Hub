@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEXUS | Calendar</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    :root {
+      --bg-main: #0a0a0c;
+      --bg-surface: #121216;
+      --bg-surface-elevated: #1a1a22;
+      --border-color: rgba(255,255,255,0.07);
+      --text-primary: #f3f4f6;
+      --text-secondary: #9ca3af;
+      --accent-blue: #0d6efd;
+      --accent-green: #10b981;
+      --accent-orange: #f59e0b;
+      --accent-purple: #8b5cf6;
+      --accent-red: #ef4444;
+      --glass-bg: rgba(18,18,22,0.85);
+      --shadow: 0 20px 40px rgba(0,0,0,0.4);
+      --transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+      --sidebar-width: 240px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg-main);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+    }
+    /* SIDEBAR */
+    .sidebar {
+      width: var(--sidebar-width);
+      min-height: 100vh;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border-color);
+      position: fixed;
+      top: 0; left: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 0;
+      z-index: 999;
+    }
+    .sidebar-logo {
+      padding: 0 24px 32px;
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 16px;
+    }
+    .sidebar-logo span { color: var(--accent-blue); }
+    .sidebar-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-secondary);
+      padding: 8px 24px;
+      margin-bottom: 4px;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 24px;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: var(--transition);
+      text-decoration: none;
+      border-left: 3px solid transparent;
+    }
+    .nav-item:hover { background: var(--bg-surface-elevated); color: var(--text-primary); }
+    .nav-item.active { color: var(--accent-blue); border-left-color: var(--accent-blue); background: rgba(13,110,253,0.08); }
+    .nav-item i { width: 18px; text-align: center; }
+    .sidebar-divider { border: none; border-top: 1px solid var(--border-color); margin: 16px 0; }
+    /* TOPBAR */
+    .topbar {
+      position: fixed; top: 0;
+      left: var(--sidebar-width); right: 0;
+      height: 64px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-color);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px;
+      z-index: 998;
+    }
+    .topbar-title { font-size: 1rem; font-weight: 600; }
+    .topbar-right { display: flex; align-items: center; gap: 16px; }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, #0d6efd, #8b5cf6);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.9rem; cursor: pointer;
+    }
+    /* MAIN */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      margin-top: 64px;
+      padding: 32px;
+      flex: 1;
+    }
+    .page-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 28px;
+    }
+    .page-header h1 { font-size: 1.6rem; font-weight: 700; }
+    .page-header p { font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; }
+    .btn-primary {
+      padding: 10px 20px;
+      background: var(--accent-blue); color: white;
+      border: none; border-radius: 8px;
+      font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center; gap: 8px;
+      transition: var(--transition);
+    }
+    .btn-primary:hover { background: #0b5ed7; }
+    /* LAYOUT */
+    .cal-layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+    }
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .card-title {
+      font-size: 1rem; font-weight: 600;
+      margin-bottom: 20px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    /* CALENDAR */
+    .cal-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .cal-nav h3 { font-size: 1.1rem; font-weight: 700; }
+    .cal-nav-btns { display: flex; gap: 8px; }
+    .cal-nav-btn {
+      width: 32px; height: 32px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 6px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-secondary); font-size: 0.8rem;
+      transition: var(--transition);
+    }
+    .cal-nav-btn:hover { color: white; border-color: var(--accent-blue); }
+    .cal-grid-header {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      margin-bottom: 8px;
+    }
+    .cal-grid-header span {
+      text-align: center; font-size: 0.72rem;
+      text-transform: uppercase; letter-spacing: 1px;
+      color: var(--text-secondary); padding: 8px 0;
+    }
+    .cal-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+    .cal-day {
+      aspect-ratio: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      border-radius: 8px; cursor: pointer;
+      font-size: 0.9rem;
+      position: relative;
+      transition: var(--transition);
+      border: 1px solid transparent;
+    }
+    .cal-day:hover { background: var(--bg-surface-elevated); }
+    .cal-day.other-month { color: var(--text-secondary); opacity: 0.4; }
+    .cal-day.today {
+      background: rgba(13,110,253,0.15);
+      border-color: var(--accent-blue);
+      color: var(--accent-blue);
+      font-weight: 700;
+    }
+    .cal-day.selected {
+      background: var(--accent-blue);
+      color: white; font-weight: 700;
+    }
+    .cal-day.has-event::after {
+      content: '';
+      position: absolute; bottom: 4px;
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--accent-green);
+    }
+    .cal-day.selected.has-event::after { background: white; }
+    /* SLOTS */
+    .slots-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 8px; margin-top: 16px;
+    }
+    .slot-btn {
+      padding: 10px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 8px; cursor: pointer;
+      text-align: center; font-size: 0.82rem;
+      color: var(--text-secondary);
+      transition: var(--transition);
+    }
+    .slot-btn:hover, .slot-btn.selected-slot {
+      border-color: var(--accent-blue);
+      color: var(--accent-blue);
+      background: rgba(13,110,253,0.08);
+    }
+    .slot-btn.booked {
+      border-color: transparent;
+      color: var(--text-secondary);
+      opacity: 0.4;
+      cursor: not-allowed;
+      text-decoration: line-through;
+    }
+    /* MEETING FORM */
+    .meeting-form { margin-top: 20px; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label {
+      display: block; font-size: 0.78rem;
+      color: var(--text-secondary);
+      margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.8px;
+    }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 8px; padding: 10px 14px;
+      color: var(--text-primary); font-size: 0.88rem;
+      transition: var(--transition); font-family: inherit;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      outline: none; border-color: var(--accent-blue);
+    }
+    .form-group select option { background: var(--bg-surface); }
+    /* MEETINGS LIST */
+    .meeting-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .meeting-item:last-child { border-bottom: none; }
+    .meeting-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%; flex-shrink: 0;
+    }
+    .meeting-info { flex: 1; }
+    .meeting-info h4 { font-size: 0.88rem; font-weight: 600; margin-bottom: 3px; }
+    .meeting-info p { font-size: 0.75rem; color: var(--text-secondary); }
+    .meeting-badge {
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 0.7rem; font-weight: 600; flex-shrink: 0;
+    }
+    .badge-confirmed { background: rgba(16,185,129,0.12); color: var(--accent-green); }
+    .badge-pending { background: rgba(245,158,11,0.12); color: var(--accent-orange); }
+    .badge-declined { background: rgba(239,68,68,0.12); color: var(--accent-red); }
+    .meeting-actions { display: flex; gap: 6px; }
+    .action-btn {
+      padding: 4px 10px;
+      border-radius: 6px; border: 1px solid var(--border-color);
+      font-size: 0.72rem; cursor: pointer;
+      background: transparent; color: var(--text-secondary);
+      transition: var(--transition);
+    }
+    .action-btn.accept:hover { border-color: var(--accent-green); color: var(--accent-green); }
+    .action-btn.decline:hover { border-color: var(--accent-red); color: var(--accent-red); }
+    /* MODAL */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(8px);
+      z-index: 3000;
+      display: none; align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 32px;
+      width: 100%; max-width: 420px;
+    }
+    .modal h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; }
+    .modal-footer { display: flex; gap: 10px; margin-top: 20px; }
+    .btn-outline {
+      flex: 1; padding: 10px;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      border-radius: 8px; color: var(--text-secondary);
+      font-size: 0.85rem; cursor: pointer;
+      transition: var(--transition);
+    }
+    .btn-outline:hover { border-color: var(--text-primary); color: var(--text-primary); }
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--accent-green);
+      border-radius: 10px; padding: 14px 20px;
+      font-size: 0.85rem; color: var(--accent-green);
+      z-index: 9999; display: none;
+      align-items: center; gap: 10px;
+      box-shadow: var(--shadow);
+    }
+    .toast.show { display: flex; }
+    @media (max-width: 1000px) { .cal-layout { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo"><span>N</span>EXUS</div>
+  <div class="sidebar-label">Main</div>
+  <a class="nav-item" href="dashboard.html"><i class="fas fa-th-large"></i> Dashboard</a>
+  <a class="nav-item active" href="calendar.html"><i class="fas fa-calendar-alt"></i> Calendar</a>
+  <a class="nav-item" href="video.html"><i class="fas fa-video"></i> Video Calls</a>
+  <a class="nav-item" href="documents.html"><i class="fas fa-file-contract"></i> Documents</a>
+  <hr class="sidebar-divider">
+  <div class="sidebar-label">Finance</div>
+  <a class="nav-item" href="payments.html"><i class="fas fa-credit-card"></i> Payments</a>
+  <a class="nav-item" href="security.html"><i class="fas fa-shield-alt"></i> Security</a>
+  <hr class="sidebar-divider">
+</aside>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="topbar-title">Calendar & Scheduling</div>
+  <div class="topbar-right">
+    <div class="avatar">U</div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="main-content">
+  <div class="page-header">
+    <div>
+      <h1>Meeting Calendar</h1>
+      <p>Schedule, manage, and track all your meetings in one place.</p>
+    </div>
+    <button class="btn-primary" onclick="openModal()">
+      <i class="fas fa-plus"></i> New Meeting
+    </button>
+  </div>
+
+  <div class="cal-layout">
+    <!-- LEFT: Calendar -->
+    <div>
+      <div class="card" style="margin-bottom:24px">
+        <div class="cal-nav">
+          <h3 id="calMonthYear">June 2026</h3>
+          <div class="cal-nav-btns">
+            <button class="cal-nav-btn" onclick="changeMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+            <button class="cal-nav-btn" onclick="changeMonth(1)"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+        <div class="cal-grid-header">
+          <span>Sun</span><span>Mon</span><span>Tue</span>
+          <span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+
+        <div style="margin-top:24px; padding-top:20px; border-top:1px solid var(--border-color)">
+          <div class="card-title" style="margin-bottom:12px">
+            Available Slots — <span style="color:var(--accent-blue);font-weight:700" id="selectedDateLabel">Select a date</span>
+          </div>
+          <div class="slots-grid" id="slotsGrid">
+            <p style="grid-column:1/-1;color:var(--text-secondary);font-size:0.85rem">Click a date to see available slots.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Meetings -->
+    <div>
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-title">Upcoming Meetings</div>
+        <div id="upcomingList"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Meeting Requests</div>
+        <div id="requestsList"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- MODAL: New Meeting -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3><i class="fas fa-calendar-plus" style="color:var(--accent-blue);margin-right:10px"></i>Schedule New Meeting</h3>
+    <div class="form-group">
+      <label>Meeting Title</label>
+      <input type="text" id="mtTitle" placeholder="e.g. Pitch Review with Investor" />
+    </div>
+    <div class="form-group">
+      <label>Date</label>
+      <input type="date" id="mtDate" />
+    </div>
+    <div class="form-group">
+      <label>Time</label>
+      <select id="mtTime">
+        <option>09:00 AM</option><option>09:30 AM</option>
+        <option>10:00 AM</option><option>10:30 AM</option>
+        <option>11:00 AM</option><option>11:30 AM</option>
+        <option>12:00 PM</option><option>01:00 PM</option>
+        <option>02:00 PM</option><option>03:00 PM</option>
+        <option>04:00 PM</option><option>05:00 PM</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Type</label>
+      <select id="mtType">
+        <option>Video Call</option>
+        <option>In Person</option>
+        <option>Document Review</option>
+        <option>Pitch Session</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Note (optional)</label>
+      <textarea id="mtNote" rows="2" placeholder="Any additional details..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" style="flex:1;justify-content:center" onclick="addMeeting()">
+        <i class="fas fa-check"></i> Confirm Meeting
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <i class="fas fa-check-circle"></i>
+  <span id="toastMsg">Meeting scheduled!</span>
+</div>
+
+<script>
+  // ── DATA ─────────────────────────────────────
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+  let today     = new Date();
+  let curYear   = today.getFullYear();
+  let curMonth  = today.getMonth();
+  let selectedDay = null;
+
+  const MEETINGS = [
+    { title: 'Pitch: TechFlow AI', date: `${curYear}-${String(curMonth+1).padStart(2,'0')}-23`, time: '09:30 AM', type: 'Video Call', status: 'confirmed', dot: '#0d6efd' },
+    { title: 'Portfolio Review', date: `${curYear}-${String(curMonth+1).padStart(2,'0')}-24`, time: '11:00 AM', type: 'In Person', status: 'confirmed', dot: '#8b5cf6' },
+    { title: 'Due Diligence: GreenX', date: `${curYear}-${String(curMonth+1).padStart(2,'0')}-25`, time: '02:00 PM', type: 'Document Review', status: 'pending', dot: '#f59e0b' },
+  ];
+
+  const REQUESTS = [
+    { title: 'NovaMed Health — Meeting Request', from: 'Dr. Sarah Khan', time: 'Tomorrow, 3:00 PM', dot: '#10b981' },
+    { title: 'Intro Call — StartupX', from: 'Ali Raza', time: 'Jun 28, 10:00 AM', dot: '#0d6efd' },
+  ];
+
+  const ALL_SLOTS = ['09:00 AM','09:30 AM','10:00 AM','10:30 AM','11:00 AM','11:30 AM','01:00 PM','02:00 PM','03:00 PM','04:00 PM'];
+  const BOOKED   = ['09:30 AM','11:00 AM','02:00 PM'];
+
+  // ── CALENDAR RENDER ───────────────────────────
+  function renderCalendar() {
+    document.getElementById('calMonthYear').textContent = `${MONTHS[curMonth]} ${curYear}`;
+    const grid = document.getElementById('calGrid');
+    grid.innerHTML = '';
+
+    const firstDay = new Date(curYear, curMonth, 1).getDay();
+    const daysInMonth = new Date(curYear, curMonth + 1, 0).getDate();
+    const daysInPrev  = new Date(curYear, curMonth, 0).getDate();
+
+    // Event dates set
+    const eventDates = new Set(MEETINGS.map(m => m.date));
+
+    // Prev month padding
+    for (let i = firstDay - 1; i >= 0; i--) {
+      const d = document.createElement('div');
+      d.className = 'cal-day other-month';
+      d.textContent = daysInPrev - i;
+      grid.appendChild(d);
+    }
+
+    // Current month
+    for (let d = 1; d <= daysInMonth; d++) {
+      const cell = document.createElement('div');
+      cell.className = 'cal-day';
+      cell.textContent = d;
+
+      const dateStr = `${curYear}-${String(curMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+
+      if (d === today.getDate() && curMonth === today.getMonth() && curYear === today.getFullYear())
+        cell.classList.add('today');
+      if (selectedDay === d && curMonth === today.getMonth())
+        cell.classList.add('selected');
+      if (eventDates.has(dateStr))
+        cell.classList.add('has-event');
+
+      cell.onclick = () => selectDay(d, dateStr);
+      grid.appendChild(cell);
+    }
+
+    // Next month padding
+    const total = firstDay + daysInMonth;
+    const remaining = total % 7 === 0 ? 0 : 7 - (total % 7);
+    for (let i = 1; i <= remaining; i++) {
+      const d = document.createElement('div');
+      d.className = 'cal-day other-month';
+      d.textContent = i;
+      grid.appendChild(d);
+    }
+  }
+
+  function changeMonth(dir) {
+    curMonth += dir;
+    if (curMonth < 0)  { curMonth = 11; curYear--; }
+    if (curMonth > 11) { curMonth = 0;  curYear++; }
+    selectedDay = null;
+    renderCalendar();
+    document.getElementById('slotsGrid').innerHTML = `<p style="grid-column:1/-1;color:var(--text-secondary);font-size:0.85rem">Click a date to see available slots.</p>`;
+    document.getElementById('selectedDateLabel').textContent = 'Select a date';
+  }
+

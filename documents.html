@@ -1,0 +1,917 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NEXUS | Document Chamber</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      :root {
+        --bg-main: #0a0a0c;
+        --bg-surface: #121216;
+        --bg-surface-elevated: #1a1a22;
+        --border-color: rgba(255, 255, 255, 0.07);
+        --text-primary: #f3f4f6;
+        --text-secondary: #9ca3af;
+        --accent-blue: #0d6efd;
+        --accent-green: #10b981;
+        --accent-orange: #f59e0b;
+        --accent-red: #ef4444;
+        --accent-purple: #8b5cf6;
+        --glass-bg: rgba(18, 18, 22, 0.85);
+        --shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        --transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        --sidebar-width: 240px;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: var(--bg-main);
+        color: var(--text-primary);
+        min-height: 100vh;
+        display: flex;
+      }
+      /* SIDEBAR */
+      .sidebar {
+        width: var(--sidebar-width);
+        min-height: 100vh;
+        background: var(--bg-surface);
+        border-right: 1px solid var(--border-color);
+        position: fixed;
+        top: 0;
+        left: 0;
+        display: flex;
+        flex-direction: column;
+        padding: 24px 0;
+        z-index: 999;
+      }
+      .sidebar-logo {
+        padding: 0 24px 32px;
+        font-size: 1.4rem;
+        font-weight: 800;
+        letter-spacing: 2px;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 16px;
+      }
+      .sidebar-logo span {
+        color: var(--accent-blue);
+      }
+      .sidebar-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--text-secondary);
+        padding: 8px 24px;
+        margin-bottom: 4px;
+      }
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 24px;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
+        border-left: 3px solid transparent;
+      }
+      .nav-item:hover {
+        background: var(--bg-surface-elevated);
+        color: var(--text-primary);
+      }
+      .nav-item.active {
+        color: var(--accent-blue);
+        border-left-color: var(--accent-blue);
+        background: rgba(13, 110, 253, 0.08);
+      }
+      .nav-item i {
+        width: 18px;
+        text-align: center;
+      }
+      .sidebar-divider {
+        border: none;
+        border-top: 1px solid var(--border-color);
+        margin: 16px 0;
+      }
+      /* TOPBAR */
+      .topbar {
+        position: fixed;
+        top: 0;
+        left: var(--sidebar-width);
+        right: 0;
+        height: 64px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 32px;
+        z-index: 998;
+      }
+      .topbar-title {
+        font-size: 1rem;
+        font-weight: 600;
+      }
+      .avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #0d6efd, #8b5cf6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+      }
+      /* MAIN */
+      .main-content {
+        margin-left: var(--sidebar-width);
+        margin-top: 64px;
+        padding: 32px;
+        flex: 1;
+      }
+      .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 28px;
+      }
+      .page-header h1 {
+        font-size: 1.6rem;
+        font-weight: 700;
+      }
+      .page-header p {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-top: 4px;
+      }
+      .btn-primary {
+        padding: 10px 20px;
+        background: var(--accent-blue);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: var(--transition);
+      }
+      .btn-primary:hover {
+        background: #0b5ed7;
+      }
+      .card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 24px;
+      }
+      .card-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      /* LAYOUT */
+      .doc-layout {
+        display: grid;
+        grid-template-columns: 1fr 360px;
+        gap: 24px;
+      }
+
+      /* UPLOAD ZONE */
+      .upload-zone {
+        border: 2px dashed var(--border-color);
+        border-radius: 12px;
+        padding: 40px 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: var(--transition);
+        margin-bottom: 24px;
+      }
+      .upload-zone:hover,
+      .upload-zone.dragover {
+        border-color: var(--accent-blue);
+        background: rgba(13, 110, 253, 0.05);
+      }
+      .upload-zone i {
+        font-size: 2.2rem;
+        color: var(--accent-blue);
+        margin-bottom: 12px;
+      }
+      .upload-zone h4 {
+        font-size: 0.95rem;
+        margin-bottom: 6px;
+      }
+      .upload-zone p {
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+      }
+      #fileInput {
+        display: none;
+      }
+
+      /* DOC LIST */
+      .doc-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .doc-table th {
+        text-align: left;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--text-secondary);
+        padding: 10px 8px;
+        border-bottom: 1px solid var(--border-color);
+      }
+      .doc-table td {
+        padding: 14px 8px;
+        font-size: 0.85rem;
+        border-bottom: 1px solid var(--border-color);
+        vertical-align: middle;
+      }
+      .doc-table tr:last-child td {
+        border-bottom: none;
+      }
+      .doc-name {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .doc-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+      }
+      .doc-icon.pdf {
+        background: rgba(239, 68, 68, 0.12);
+        color: var(--accent-red);
+      }
+      .doc-icon.doc {
+        background: rgba(13, 110, 253, 0.12);
+        color: var(--accent-blue);
+      }
+      .doc-name-text {
+        font-weight: 600;
+      }
+      .doc-meta {
+        font-size: 0.72rem;
+        color: var(--text-secondary);
+      }
+      .status-label {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .status-draft {
+        background: rgba(156, 163, 175, 0.12);
+        color: var(--text-secondary);
+      }
+      .status-review {
+        background: rgba(245, 158, 11, 0.12);
+        color: var(--accent-orange);
+      }
+      .status-signed {
+        background: rgba(16, 185, 129, 0.12);
+        color: var(--accent-green);
+      }
+      .doc-actions {
+        display: flex;
+        gap: 6px;
+      }
+      .action-icon-btn {
+        width: 30px;
+        height: 30px;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        background: transparent;
+        color: var(--text-secondary);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        transition: var(--transition);
+      }
+      .action-icon-btn:hover {
+        border-color: var(--accent-blue);
+        color: var(--accent-blue);
+      }
+
+      /* RIGHT PANEL */
+      .stat-box {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--border-color);
+      }
+      .stat-box:last-child {
+        border-bottom: none;
+      }
+      .stat-box span:first-child {
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+      }
+      .stat-box span:last-child {
+        font-weight: 700;
+      }
+
+      /* MODAL: PREVIEW */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(8px);
+        z-index: 3000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+      .modal-overlay.open {
+        display: flex;
+      }
+      .modal {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 28px;
+        width: 100%;
+        max-width: 520px;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+      .modal h3 {
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+      .modal .modal-sub {
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+        margin-bottom: 20px;
+      }
+      .doc-preview-box {
+        background: #0d0d10;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: 30px 20px;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .doc-preview-box i {
+        font-size: 2.8rem;
+        color: var(--accent-red);
+        margin-bottom: 10px;
+      }
+      .doc-preview-box h4 {
+        font-size: 0.9rem;
+        margin-bottom: 4px;
+      }
+      .doc-preview-box p {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+      }
+
+      .status-select-row {
+        margin-bottom: 20px;
+      }
+      .status-select-row label {
+        display: block;
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+      }
+      .status-select-row select {
+        width: 100%;
+        background: var(--bg-surface-elevated);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 10px 14px;
+        color: var(--text-primary);
+        font-size: 0.88rem;
+        font-family: inherit;
+      }
+
+      /* SIGNATURE PAD */
+      .sig-label {
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+      }
+      #sigPad {
+        width: 100%;
+        height: 160px;
+        background: #0d0d10;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        cursor: crosshair;
+        touch-action: none;
+      }
+      .sig-controls {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+        margin-bottom: 20px;
+      }
+      .btn-outline {
+        padding: 8px 16px;
+        background: transparent;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+      .btn-outline:hover {
+        border-color: var(--text-primary);
+        color: var(--text-primary);
+      }
+      .modal-footer {
+        display: flex;
+        gap: 10px;
+      }
+
+      .toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: var(--bg-surface-elevated);
+        border: 1px solid var(--accent-green);
+        border-radius: 10px;
+        padding: 14px 20px;
+        font-size: 0.85rem;
+        color: var(--accent-green);
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        gap: 10px;
+        box-shadow: var(--shadow);
+      }
+      .toast.show {
+        display: flex;
+      }
+
+      @media (max-width: 1000px) {
+        .doc-layout {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-logo"><span>N</span>EXUS</div>
+      <div class="sidebar-label">Main</div>
+      <a class="nav-item" href="dashboard.html"
+        ><i class="fas fa-th-large"></i> Dashboard</a
+      >
+      <a class="nav-item" href="calendar.html"
+        ><i class="fas fa-calendar-alt"></i> Calendar</a
+      >
+      <a class="nav-item" href="video.html"
+        ><i class="fas fa-video"></i> Video Calls</a
+      >
+      <a class="nav-item active" href="documents.html"
+        ><i class="fas fa-file-contract"></i> Documents</a
+      >
+      <hr class="sidebar-divider" />
+      <div class="sidebar-label">Finance</div>
+      <a class="nav-item" href="payments.html"
+        ><i class="fas fa-credit-card"></i> Payments</a
+      >
+      <a class="nav-item" href="security.html"
+        ><i class="fas fa-shield-alt"></i> Security</a
+      >
+      <hr class="sidebar-divider" />
+    </aside>
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-title">Document Chamber</div>
+      <div class="avatar">U</div>
+    </header>
+
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <h1>Document Chamber</h1>
+          <p>Upload, review, and e-sign deals & contracts securely.</p>
+        </div>
+        <button
+          class="btn-primary"
+          onclick="document.getElementById('fileInput').click()"
+        >
+          <i class="fas fa-upload"></i> Upload Document
+        </button>
+      </div>
+
+      <div class="doc-layout">
+        <!-- LEFT -->
+        <div>
+          <div class="card" style="margin-bottom: 24px">
+            <div
+              id="uploadZone"
+              class="upload-zone"
+              onclick="document.getElementById('fileInput').click()"
+            >
+              <input
+                type="file"
+                id="fileInput"
+                accept=".pdf,.doc,.docx"
+                onchange="handleFileSelect(event)"
+              />
+              <i class="fas fa-cloud-upload-alt"></i>
+              <h4>Drag & drop files here, or click to browse</h4>
+              <p>Supports PDF, DOC, DOCX — Max 25MB</p>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">All Documents</div>
+            <table class="doc-table">
+              <thead>
+                <tr>
+                  <th>Document</th>
+                  <th>Status</th>
+                  <th>Last Updated</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="docTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- RIGHT -->
+        <div>
+          <div class="card" style="margin-bottom: 20px">
+            <div class="card-title">Overview</div>
+            <div class="stat-box">
+              <span>Total Documents</span><span id="statTotal">0</span>
+            </div>
+            <div class="stat-box">
+              <span>Draft</span
+              ><span id="statDraft" style="color: var(--text-secondary)"
+                >0</span
+              >
+            </div>
+            <div class="stat-box">
+              <span>In Review</span
+              ><span id="statReview" style="color: var(--accent-orange)"
+                >0</span
+              >
+            </div>
+            <div class="stat-box">
+              <span>Signed</span
+              ><span id="statSigned" style="color: var(--accent-green)">0</span>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Quick Tips</div>
+            <p
+              style="
+                font-size: 0.8rem;
+                color: var(--text-secondary);
+                line-height: 1.6;
+              "
+            >
+              Click any document to preview it, change its status, or add your
+              e-signature. Signed documents are locked from further edits.
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- MODAL: PREVIEW / SIGN -->
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal">
+        <h3 id="modalDocName">Document Name</h3>
+        <p class="modal-sub" id="modalDocMeta">Uploaded just now</p>
+
+        <div class="doc-preview-box">
+          <i class="fas fa-file-pdf" id="modalPreviewIcon"></i>
+          <h4>Preview not available</h4>
+          <p>
+            This is a frontend mockup — actual file preview requires backend
+            storage.
+          </p>
+        </div>
+
+        <div class="status-select-row">
+          <label>Document Status</label>
+          <select id="statusSelect">
+            <option value="draft">Draft</option>
+            <option value="review">In Review</option>
+            <option value="signed">Signed</option>
+          </select>
+        </div>
+
+        <div class="sig-label">E-Signature</div>
+        <canvas id="sigPad" width="460" height="160"></canvas>
+        <div class="sig-controls">
+          <button class="btn-outline" onclick="clearSig()">
+            <i class="fas fa-eraser"></i> Clear
+          </button>
+          <button class="btn-outline" onclick="useTypedSig()">
+            <i class="fas fa-keyboard"></i> Type Instead
+          </button>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-outline" style="flex: 1" onclick="closeModal()">
+            Cancel
+          </button>
+          <button
+            class="btn-primary"
+            style="flex: 1; justify-content: center"
+            onclick="saveDocument()"
+          >
+            <i class="fas fa-check"></i> Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast">
+      <i class="fas fa-check-circle"></i>
+      <span id="toastMsg">Document updated!</span>
+    </div>
+
+    <script>
+      let DOCS = [
+        {
+          id: 1,
+          name: "TechFlow_AI_Term_Sheet.pdf",
+          type: "pdf",
+          status: "review",
+          updated: "Today, 10:20 AM",
+          signed: false,
+        },
+        {
+          id: 2,
+          name: "GreenX_NDA.pdf",
+          type: "pdf",
+          status: "signed",
+          updated: "Yesterday",
+          signed: true,
+        },
+        {
+          id: 3,
+          name: "NovaMed_Investment_Agreement.docx",
+          type: "doc",
+          status: "draft",
+          updated: "Jun 18",
+          signed: false,
+        },
+      ];
+
+      let activeDocId = null;
+      let isDrawing = false;
+      let hasSignature = false;
+
+      const statusLabel = {
+        draft: "Draft",
+        review: "In Review",
+        signed: "Signed",
+      };
+      const statusClass = {
+        draft: "status-draft",
+        review: "status-review",
+        signed: "status-signed",
+      };
+
+      function renderTable() {
+        const body = document.getElementById("docTableBody");
+        body.innerHTML = DOCS.map(
+          (d) => `
+      <tr>
+        <td>
+          <div class="doc-name">
+            <div class="doc-icon ${d.type}"><i class="fas fa-file-${d.type === "pdf" ? "pdf" : "word"}"></i></div>
+            <div>
+              <div class="doc-name-text">${d.name}</div>
+              <div class="doc-meta">${d.type.toUpperCase()}</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="status-label ${statusClass[d.status]}">${statusLabel[d.status]}</span></td>
+        <td><span class="doc-meta">${d.updated}</span></td>
+        <td>
+          <div class="doc-actions">
+            <button class="action-icon-btn" onclick="openModal(${d.id})" title="View"><i class="fas fa-eye"></i></button>
+            <button class="action-icon-btn" onclick="deleteDoc(${d.id})" title="Delete"><i class="fas fa-trash"></i></button>
+          </div>
+        </td>
+      </tr>
+    `,
+        ).join("");
+
+        document.getElementById("statTotal").textContent = DOCS.length;
+        document.getElementById("statDraft").textContent = DOCS.filter(
+          (d) => d.status === "draft",
+        ).length;
+        document.getElementById("statReview").textContent = DOCS.filter(
+          (d) => d.status === "review",
+        ).length;
+        document.getElementById("statSigned").textContent = DOCS.filter(
+          (d) => d.status === "signed",
+        ).length;
+      }
+
+      // ── UPLOAD ────────────────────────────────────
+      function handleFileSelect(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const ext = file.name.split(".").pop().toLowerCase();
+        const type = ext === "pdf" ? "pdf" : "doc";
+        const newDoc = {
+          id: Date.now(),
+          name: file.name,
+          type,
+          status: "draft",
+          updated: "Just now",
+          signed: false,
+        };
+        DOCS.unshift(newDoc);
+        renderTable();
+        showToast(`"${file.name}" uploaded successfully!`);
+        e.target.value = "";
+      }
+
+      const uploadZone = document.getElementById("uploadZone");
+      ["dragover", "dragenter"].forEach((evt) =>
+        uploadZone.addEventListener(evt, (e) => {
+          e.preventDefault();
+          uploadZone.classList.add("dragover");
+        }),
+      );
+      ["dragleave", "drop"].forEach((evt) =>
+        uploadZone.addEventListener(evt, (e) => {
+          e.preventDefault();
+          uploadZone.classList.remove("dragover");
+        }),
+      );
+      uploadZone.addEventListener("drop", (e) => {
+        const file = e.dataTransfer.files[0];
+        if (!file) return;
+        const ext = file.name.split(".").pop().toLowerCase();
+        const type = ext === "pdf" ? "pdf" : "doc";
+        DOCS.unshift({
+          id: Date.now(),
+          name: file.name,
+          type,
+          status: "draft",
+          updated: "Just now",
+          signed: false,
+        });
+        renderTable();
+        showToast(`"${file.name}" uploaded successfully!`);
+      });
+
+      // ── MODAL ─────────────────────────────────────
+      function openModal(id) {
+        activeDocId = id;
+        const doc = DOCS.find((d) => d.id === id);
+        document.getElementById("modalDocName").textContent = doc.name;
+        document.getElementById("modalDocMeta").textContent =
+          `${doc.type.toUpperCase()} · Updated ${doc.updated}`;
+        document.getElementById("modalPreviewIcon").className =
+          `fas fa-file-${doc.type === "pdf" ? "pdf" : "word"}`;
+        document.getElementById("statusSelect").value = doc.status;
+        clearSig();
+        document.getElementById("modalOverlay").classList.add("open");
+      }
+
+      function closeModal() {
+        document.getElementById("modalOverlay").classList.remove("open");
+        activeDocId = null;
+      }
+
+      function deleteDoc(id) {
+        DOCS = DOCS.filter((d) => d.id !== id);
+        renderTable();
+        showToast("Document deleted.");
+      }
+
+      function saveDocument() {
+        const doc = DOCS.find((d) => d.id === activeDocId);
+        if (!doc) return;
+        const newStatus = document.getElementById("statusSelect").value;
+
+        if (newStatus === "signed" && !hasSignature) {
+          alert("Please add a signature before marking as Signed.");
+          return;
+        }
+
+        doc.status = newStatus;
+        doc.updated = "Just now";
+        renderTable();
+        closeModal();
+        showToast(`"${doc.name}" updated to ${statusLabel[newStatus]}.`);
+      }
+
+      // ── SIGNATURE PAD ─────────────────────────────
+      const canvas = document.getElementById("sigPad");
+      const ctx = canvas.getContext("2d");
+      ctx.strokeStyle = "#f3f4f6";
+      ctx.lineWidth = 2;
+      ctx.lineCap = "round";
+
+      function getPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+          x: (clientX - rect.left) * scaleX,
+          y: (clientY - rect.top) * scaleY,
+        };
+      }
+
+      function startDraw(e) {
+        isDrawing = true;
+        const pos = getPos(e);
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+      }
+      function draw(e) {
+        if (!isDrawing) return;
+        const pos = getPos(e);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+        hasSignature = true;
+        e.preventDefault();
+      }
+      function stopDraw() {
+        isDrawing = false;
+      }
+
+      canvas.addEventListener("mousedown", startDraw);
+      canvas.addEventListener("mousemove", draw);
+      canvas.addEventListener("mouseup", stopDraw);
+      canvas.addEventListener("mouseleave", stopDraw);
+      canvas.addEventListener("touchstart", startDraw);
+      canvas.addEventListener("touchmove", draw);
+      canvas.addEventListener("touchend", stopDraw);
+
+      function clearSig() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        hasSignature = false;
+      }
+
+      function useTypedSig() {
+        const name = prompt("Type your full name to sign:");
+        if (!name) return;
+        clearSig();
+        ctx.font = "italic 32px Georgia";
+        ctx.fillStyle = "#f3f4f6";
+        ctx.fillText(name, 20, 90);
+        hasSignature = true;
+      }
+
+      // ── TOAST ─────────────────────────────────────
+      function showToast(msg) {
+        const t = document.getElementById("toast");
+        document.getElementById("toastMsg").textContent = msg;
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 3000);
+      }
+
+      // ── INIT ──────────────────────────────────────
+      renderTable();
+    </script>
+  </body>
+</html>

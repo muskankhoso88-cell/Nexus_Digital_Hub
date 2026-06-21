@@ -1,0 +1,1232 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NEXUS | Video Call</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      :root {
+        --bg-main: #0a0a0c;
+        --bg-surface: #121216;
+        --bg-surface-elevated: #1a1a22;
+        --border-color: rgba(255, 255, 255, 0.07);
+        --text-primary: #f3f4f6;
+        --text-secondary: #9ca3af;
+        --accent-blue: #0d6efd;
+        --accent-green: #10b981;
+        --accent-orange: #f59e0b;
+        --accent-red: #ef4444;
+        --accent-purple: #8b5cf6;
+        --glass-bg: rgba(18, 18, 22, 0.85);
+        --shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        --transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        --sidebar-width: 240px;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: var(--bg-main);
+        color: var(--text-primary);
+        min-height: 100vh;
+        display: flex;
+      }
+      /* SIDEBAR */
+      .sidebar {
+        width: var(--sidebar-width);
+        min-height: 100vh;
+        background: var(--bg-surface);
+        border-right: 1px solid var(--border-color);
+        position: fixed;
+        top: 0;
+        left: 0;
+        display: flex;
+        flex-direction: column;
+        padding: 24px 0;
+        z-index: 999;
+      }
+      .sidebar-logo {
+        padding: 0 24px 32px;
+        font-size: 1.4rem;
+        font-weight: 800;
+        letter-spacing: 2px;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 16px;
+      }
+      .sidebar-logo span {
+        color: var(--accent-blue);
+      }
+      .sidebar-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--text-secondary);
+        padding: 8px 24px;
+        margin-bottom: 4px;
+      }
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 24px;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
+        border-left: 3px solid transparent;
+      }
+      .nav-item:hover {
+        background: var(--bg-surface-elevated);
+        color: var(--text-primary);
+      }
+      .nav-item.active {
+        color: var(--accent-blue);
+        border-left-color: var(--accent-blue);
+        background: rgba(13, 110, 253, 0.08);
+      }
+      .nav-item i {
+        width: 18px;
+        text-align: center;
+      }
+      .sidebar-divider {
+        border: none;
+        border-top: 1px solid var(--border-color);
+        margin: 16px 0;
+      }
+      /* TOPBAR */
+      .topbar {
+        position: fixed;
+        top: 0;
+        left: var(--sidebar-width);
+        right: 0;
+        height: 64px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 32px;
+        z-index: 998;
+      }
+      .topbar-title {
+        font-size: 1rem;
+        font-weight: 600;
+      }
+      .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #0d6efd, #8b5cf6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+      }
+      /* MAIN */
+      .main-content {
+        margin-left: var(--sidebar-width);
+        margin-top: 64px;
+        padding: 32px;
+        flex: 1;
+      }
+      .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 28px;
+      }
+      .page-header h1 {
+        font-size: 1.6rem;
+        font-weight: 700;
+      }
+      .page-header p {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-top: 4px;
+      }
+
+      /* ── PRE-CALL SCREEN ── */
+      #preCallScreen {
+        display: block;
+      }
+      #callScreen {
+        display: none;
+      }
+
+      .call-layout {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 24px;
+      }
+      .card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 24px;
+      }
+      .card-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      /* LOBBY */
+      .lobby-preview {
+        background: #0d0d10;
+        border-radius: 12px;
+        aspect-ratio: 16/9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 24px;
+      }
+      .lobby-avatar {
+        width: 96px;
+        height: 96px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #0d6efd, #8b5cf6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        font-weight: 800;
+      }
+      .cam-off-label {
+        position: absolute;
+        bottom: 16px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+        background: rgba(0, 0, 0, 0.6);
+        padding: 4px 12px;
+        border-radius: 20px;
+      }
+      .lobby-controls {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        margin-bottom: 28px;
+      }
+      .ctrl-btn {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        border: 1px solid var(--border-color);
+        background: var(--bg-surface-elevated);
+        color: var(--text-primary);
+        font-size: 1.1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition);
+      }
+      .ctrl-btn:hover {
+        border-color: var(--accent-blue);
+        color: var(--accent-blue);
+      }
+      .ctrl-btn.off {
+        background: rgba(239, 68, 68, 0.12);
+        border-color: var(--accent-red);
+        color: var(--accent-red);
+      }
+
+      .join-btn {
+        width: 100%;
+        padding: 14px;
+        background: var(--accent-blue);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: var(--transition);
+      }
+      .join-btn:hover {
+        background: #0b5ed7;
+        transform: translateY(-2px);
+      }
+
+      /* SCHEDULED CALLS */
+      .call-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 0;
+        border-bottom: 1px solid var(--border-color);
+      }
+      .call-item:last-child {
+        border-bottom: none;
+      }
+      .call-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+      }
+      .call-info {
+        flex: 1;
+      }
+      .call-info h4 {
+        font-size: 0.88rem;
+        font-weight: 600;
+        margin-bottom: 3px;
+      }
+      .call-info p {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+      }
+      .call-join-btn {
+        padding: 6px 14px;
+        background: var(--accent-blue);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        flex-shrink: 0;
+      }
+      .call-join-btn:hover {
+        background: #0b5ed7;
+      }
+      .call-join-btn.soon {
+        background: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--text-secondary);
+      }
+
+      /* ── ACTIVE CALL SCREEN ── */
+      .video-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+      .video-tile {
+        background: #0d0d10;
+        border-radius: 12px;
+        aspect-ratio: 16/9;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid transparent;
+        transition: var(--transition);
+      }
+      .video-tile.speaking {
+        border-color: var(--accent-green);
+      }
+      .video-tile.self {
+        grid-column: 1;
+        grid-row: 1;
+      }
+      .video-tile.remote {
+        grid-column: 2;
+        grid-row: 1 / 3;
+      }
+      .video-tile.screen-share {
+        grid-column: 1 / 3;
+      }
+
+      .video-avatar {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        font-weight: 800;
+      }
+      .video-label {
+        position: absolute;
+        bottom: 10px;
+        left: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        background: rgba(0, 0, 0, 0.6);
+        padding: 3px 10px;
+        border-radius: 20px;
+      }
+      .video-muted {
+        position: absolute;
+        bottom: 10px;
+        right: 12px;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: rgba(239, 68, 68, 0.8);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+      }
+      .video-muted.show {
+        display: flex;
+      }
+
+      /* CALL CONTROLS BAR */
+      .call-controls-bar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 16px;
+        background: var(--bg-surface-elevated);
+        border-radius: 16px;
+        margin-bottom: 16px;
+      }
+      .cc-btn {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        border: 1px solid var(--border-color);
+        background: var(--bg-surface);
+        color: var(--text-primary);
+        font-size: 1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition);
+        position: relative;
+      }
+      .cc-btn:hover {
+        border-color: var(--accent-blue);
+        color: var(--accent-blue);
+      }
+      .cc-btn.active {
+        background: var(--accent-blue);
+        border-color: var(--accent-blue);
+        color: white;
+      }
+      .cc-btn.danger {
+        background: var(--accent-red);
+        border-color: var(--accent-red);
+        color: white;
+        width: 56px;
+        height: 56px;
+        font-size: 1.2rem;
+      }
+      .cc-btn.danger:hover {
+        background: #dc2626;
+      }
+      .cc-tooltip {
+        position: absolute;
+        bottom: -28px;
+        font-size: 0.65rem;
+        color: var(--text-secondary);
+        white-space: nowrap;
+        pointer-events: none;
+      }
+
+      /* CALL SIDEBAR */
+      .call-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .participants-list {
+        list-style: none;
+      }
+      .participant-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.85rem;
+      }
+      .participant-item:last-child {
+        border-bottom: none;
+      }
+      .p-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+      .p-status {
+        margin-left: auto;
+        font-size: 0.7rem;
+      }
+      .p-status.speaking {
+        color: var(--accent-green);
+      }
+      .p-status.muted {
+        color: var(--accent-red);
+      }
+
+      /* CHAT */
+      .chat-box {
+        height: 180px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 12px;
+        padding-right: 4px;
+      }
+      .chat-msg {
+        font-size: 0.78rem;
+        line-height: 1.4;
+      }
+      .chat-msg .sender {
+        font-weight: 700;
+        color: var(--accent-blue);
+        margin-right: 6px;
+      }
+      .chat-msg.system .sender {
+        color: var(--text-secondary);
+        font-style: italic;
+      }
+      .chat-input-row {
+        display: flex;
+        gap: 8px;
+      }
+      .chat-input {
+        flex: 1;
+        background: var(--bg-surface-elevated);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 8px 12px;
+        color: var(--text-primary);
+        font-size: 0.82rem;
+        font-family: inherit;
+      }
+      .chat-input:focus {
+        outline: none;
+        border-color: var(--accent-blue);
+      }
+      .chat-send {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background: var(--accent-blue);
+        border: none;
+        color: white;
+        cursor: pointer;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition);
+      }
+      .chat-send:hover {
+        background: #0b5ed7;
+      }
+
+      /* TIMER */
+      .call-timer {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: var(--accent-green);
+        letter-spacing: 2px;
+        text-align: center;
+        margin-bottom: 8px;
+      }
+      .call-status-label {
+        text-align: center;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin-bottom: 16px;
+      }
+
+      /* SCREEN SHARE BANNER */
+      .screen-share-banner {
+        background: rgba(139, 92, 246, 0.12);
+        border: 1px solid rgba(139, 92, 246, 0.3);
+        border-radius: 8px;
+        padding: 10px 16px;
+        font-size: 0.82rem;
+        color: var(--accent-purple);
+        display: none;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .screen-share-banner.show {
+        display: flex;
+      }
+
+      @media (max-width: 1000px) {
+        .call-layout {
+          grid-template-columns: 1fr;
+        }
+        .video-grid {
+          grid-template-columns: 1fr;
+        }
+        .video-tile.remote {
+          grid-column: 1;
+          grid-row: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-logo"><span>N</span>EXUS</div>
+      <div class="sidebar-label">Main</div>
+      <a class="nav-item" href="dashboard.html"
+        ><i class="fas fa-th-large"></i> Dashboard</a
+      >
+      <a class="nav-item" href="calendar.html"
+        ><i class="fas fa-calendar-alt"></i> Calendar</a
+      >
+      <a class="nav-item active" href="video.html"
+        ><i class="fas fa-video"></i> Video Calls</a
+      >
+      <a class="nav-item" href="documents.html"
+        ><i class="fas fa-file-contract"></i> Documents</a
+      >
+      <hr class="sidebar-divider" />
+      <div class="sidebar-label">Finance</div>
+      <a class="nav-item" href="payments.html"
+        ><i class="fas fa-credit-card"></i> Payments</a
+      >
+      <a class="nav-item" href="security.html"
+        ><i class="fas fa-shield-alt"></i> Security</a
+      >
+      <hr class="sidebar-divider" />
+    </aside>
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-title">Video Calls</div>
+      <div class="topbar-right">
+        <div class="avatar">U</div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <h1>Video Call Center</h1>
+          <p>Start or join investor & partner meetings instantly.</p>
+        </div>
+      </div>
+
+      <!-- ═══ PRE-CALL SCREEN ═══ -->
+      <div id="preCallScreen">
+        <div class="call-layout">
+          <!-- LEFT: Lobby -->
+          <div class="card">
+            <div class="card-title">Join a Meeting</div>
+
+            <div class="lobby-preview" id="lobbyPreview">
+              <div class="lobby-avatar" id="lobbyAvatarEl">U</div>
+              <div class="cam-off-label" id="camLabel">Camera is off</div>
+            </div>
+
+            <div class="lobby-controls">
+              <button
+                class="ctrl-btn off"
+                id="lobbyMicBtn"
+                onclick="toggleLobbyMic()"
+                title="Microphone"
+              >
+                <i class="fas fa-microphone-slash" id="lobbyMicIcon"></i>
+              </button>
+              <button
+                class="ctrl-btn off"
+                id="lobbyCamBtn"
+                onclick="toggleLobbyCam()"
+                title="Camera"
+              >
+                <i class="fas fa-video-slash" id="lobbyCamIcon"></i>
+              </button>
+              <button
+                class="ctrl-btn"
+                onclick="toggleLobbyBg()"
+                title="Background"
+              >
+                <i class="fas fa-image"></i>
+              </button>
+              <button class="ctrl-btn" title="Settings">
+                <i class="fas fa-cog"></i>
+              </button>
+            </div>
+
+            <div style="margin-bottom: 16px">
+              <label
+                style="
+                  font-size: 0.78rem;
+                  color: var(--text-secondary);
+                  display: block;
+                  margin-bottom: 8px;
+                  text-transform: uppercase;
+                  letter-spacing: 0.8px;
+                "
+                >Meeting ID or Link</label
+              >
+              <div style="display: flex; gap: 10px">
+                <input
+                  id="meetingIdInput"
+                  type="text"
+                  placeholder="Enter meeting ID e.g. NX-2024-7890"
+                  style="
+                    flex: 1;
+                    background: var(--bg-surface-elevated);
+                    border: 1px solid var(--border-color);
+                    border-radius: 8px;
+                    padding: 10px 14px;
+                    color: var(--text-primary);
+                    font-size: 0.88rem;
+                    font-family: inherit;
+                    outline: none;
+                  "
+                />
+                <button
+                  onclick="joinMeeting()"
+                  class="join-btn"
+                  style="width: auto; padding: 10px 20px; font-size: 0.88rem"
+                >
+                  <i class="fas fa-sign-in-alt"></i> Join
+                </button>
+              </div>
+            </div>
+
+            <button class="join-btn" onclick="startCall()">
+              <i class="fas fa-video"></i> Start Instant Meeting
+            </button>
+          </div>
+
+          <!-- RIGHT: Scheduled Calls -->
+          <div>
+            <div class="card" style="margin-bottom: 20px">
+              <div class="card-title">Scheduled Calls</div>
+              <div class="call-item">
+                <div
+                  class="call-avatar"
+                  style="
+                    background: rgba(13, 110, 253, 0.15);
+                    color: var(--accent-blue);
+                  "
+                >
+                  TF
+                </div>
+                <div class="call-info">
+                  <h4>TechFlow AI — Pitch</h4>
+                  <p>Today · 09:30 AM · 4 participants</p>
+                </div>
+                <button class="call-join-btn" onclick="startCall()">
+                  Join
+                </button>
+              </div>
+              <div class="call-item">
+                <div
+                  class="call-avatar"
+                  style="
+                    background: rgba(16, 185, 129, 0.15);
+                    color: var(--accent-green);
+                  "
+                >
+                  GX
+                </div>
+                <div class="call-info">
+                  <h4>GreenX Energy — Review</h4>
+                  <p>Today · 02:00 PM · 2 participants</p>
+                </div>
+                <button class="call-join-btn soon">In 4h</button>
+              </div>
+              <div class="call-item">
+                <div
+                  class="call-avatar"
+                  style="
+                    background: rgba(139, 92, 246, 0.15);
+                    color: var(--accent-purple);
+                  "
+                >
+                  NM
+                </div>
+                <div class="call-info">
+                  <h4>NovaMed — NDA Signing</h4>
+                  <p>Tomorrow · 11:00 AM · 3 participants</p>
+                </div>
+                <button class="call-join-btn soon">Tomorrow</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Recent Calls</div>
+              <div class="call-item">
+                <div
+                  class="call-avatar"
+                  style="
+                    background: rgba(245, 158, 11, 0.15);
+                    color: var(--accent-orange);
+                  "
+                >
+                  SK
+                </div>
+                <div class="call-info">
+                  <h4>Sarah Khan — Portfolio Update</h4>
+                  <p>Yesterday · 45 min</p>
+                </div>
+                <button class="call-join-btn" onclick="startCall()">
+                  <i class="fas fa-redo" style="font-size: 0.7rem"></i> Recall
+                </button>
+              </div>
+              <div class="call-item">
+                <div
+                  class="call-avatar"
+                  style="
+                    background: rgba(239, 68, 68, 0.15);
+                    color: var(--accent-red);
+                  "
+                >
+                  AR
+                </div>
+                <div class="call-info">
+                  <h4>Ali Raza — Startup Pitch</h4>
+                  <p>Jun 19 · 28 min</p>
+                </div>
+                <button class="call-join-btn" onclick="startCall()">
+                  <i class="fas fa-redo" style="font-size: 0.7rem"></i> Recall
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ ACTIVE CALL SCREEN ═══ -->
+      <div id="callScreen">
+        <!-- Screen Share Banner -->
+        <div class="screen-share-banner" id="screenShareBanner">
+          <i class="fas fa-desktop"></i>
+          You are sharing your screen —
+          <strong style="margin-left: 4px">TechFlow AI Pitch.pdf</strong>
+          <button
+            onclick="toggleScreenShare()"
+            style="
+              margin-left: auto;
+              background: rgba(139, 92, 246, 0.2);
+              border: 1px solid var(--accent-purple);
+              color: var(--accent-purple);
+              padding: 4px 12px;
+              border-radius: 6px;
+              cursor: pointer;
+              font-size: 0.75rem;
+            "
+          >
+            Stop Sharing
+          </button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 300px; gap: 20px">
+          <!-- VIDEO AREA -->
+          <div>
+            <div class="call-timer" id="callTimer">00:00</div>
+            <div class="call-status-label">
+              🔴 Live · NX-2024-7890 · TechFlow AI Pitch
+            </div>
+
+            <div class="video-grid" id="videoGrid">
+              <div class="video-tile self" id="selfTile">
+                <div
+                  class="video-avatar"
+                  style="background: linear-gradient(135deg, #0d6efd, #8b5cf6)"
+                >
+                  U
+                </div>
+                <div class="video-label">You</div>
+                <div class="video-muted" id="selfMutedIcon">
+                  <i class="fas fa-microphone-slash"></i>
+                </div>
+              </div>
+              <div class="video-tile remote speaking" id="remoteTile1">
+                <div
+                  class="video-avatar"
+                  style="background: linear-gradient(135deg, #10b981, #0d6efd)"
+                >
+                  TF
+                </div>
+                <div class="video-label">TechFlow AI</div>
+              </div>
+              <div class="video-tile" id="remoteTile2">
+                <div
+                  class="video-avatar"
+                  style="background: linear-gradient(135deg, #f59e0b, #ef4444)"
+                >
+                  SK
+                </div>
+                <div class="video-label">Sarah K.</div>
+              </div>
+            </div>
+
+            <!-- CONTROLS -->
+            <div class="call-controls-bar">
+              <button
+                class="cc-btn"
+                id="micBtn"
+                onclick="toggleMic()"
+                title="Mic"
+              >
+                <i class="fas fa-microphone" id="micIcon"></i>
+                <span class="cc-tooltip">Mic</span>
+              </button>
+              <button
+                class="cc-btn"
+                id="camBtn"
+                onclick="toggleCam()"
+                title="Camera"
+              >
+                <i class="fas fa-video" id="camIcon"></i>
+                <span class="cc-tooltip">Camera</span>
+              </button>
+              <button
+                class="cc-btn"
+                id="screenBtn"
+                onclick="toggleScreenShare()"
+                title="Share Screen"
+              >
+                <i class="fas fa-desktop" id="screenIcon"></i>
+                <span class="cc-tooltip">Share</span>
+              </button>
+              <button
+                class="cc-btn"
+                onclick="toggleRecording()"
+                id="recBtn"
+                title="Record"
+              >
+                <i
+                  class="fas fa-circle"
+                  id="recIcon"
+                  style="color: var(--accent-red); font-size: 0.7rem"
+                ></i>
+                <span class="cc-tooltip">Record</span>
+              </button>
+              <button
+                class="cc-btn"
+                onclick="toggleHand()"
+                id="handBtn"
+                title="Raise Hand"
+              >
+                <i class="fas fa-hand-paper"></i>
+                <span class="cc-tooltip">Hand</span>
+              </button>
+              <button
+                class="cc-btn danger"
+                onclick="endCall()"
+                title="End Call"
+              >
+                <i class="fas fa-phone-slash"></i>
+                <span class="cc-tooltip">End</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- CALL SIDEBAR -->
+          <div class="call-sidebar">
+            <!-- Participants -->
+            <div class="card">
+              <div class="card-title">
+                Participants
+                <span
+                  style="
+                    color: var(--text-secondary);
+                    font-weight: 400;
+                    font-size: 0.8rem;
+                  "
+                  >3</span
+                >
+              </div>
+              <ul class="participants-list">
+                <li class="participant-item">
+                  <div
+                    class="p-avatar"
+                    style="
+                      background: rgba(13, 110, 253, 0.15);
+                      color: var(--accent-blue);
+                    "
+                  >
+                    U
+                  </div>
+                  <span>You (Host)</span>
+                  <span class="p-status muted" id="myStatus">Muted</span>
+                </li>
+                <li class="participant-item">
+                  <div
+                    class="p-avatar"
+                    style="
+                      background: rgba(16, 185, 129, 0.15);
+                      color: var(--accent-green);
+                    "
+                  >
+                    TF
+                  </div>
+                  <span>TechFlow AI</span>
+                  <span class="p-status speaking">Speaking</span>
+                </li>
+                <li class="participant-item">
+                  <div
+                    class="p-avatar"
+                    style="
+                      background: rgba(245, 158, 11, 0.15);
+                      color: var(--accent-orange);
+                    "
+                  >
+                    SK
+                  </div>
+                  <span>Sarah K.</span>
+                  <span class="p-status muted">Muted</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Chat -->
+            <div class="card" style="flex: 1">
+              <div class="card-title">Chat</div>
+              <div class="chat-box" id="chatBox">
+                <div class="chat-msg system">
+                  <span class="sender">System</span>Meeting started
+                </div>
+                <div class="chat-msg">
+                  <span class="sender">TechFlow AI</span>Hello everyone! Ready
+                  to present.
+                </div>
+                <div class="chat-msg">
+                  <span class="sender">Sarah K.</span>Great, let's begin!
+                </div>
+              </div>
+              <div class="chat-input-row">
+                <input
+                  class="chat-input"
+                  id="chatInput"
+                  placeholder="Type a message..."
+                  onkeydown="if (event.key === 'Enter') sendChat();"
+                />
+                <button class="chat-send" onclick="sendChat()">
+                  <i class="fas fa-paper-plane"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      // ── STATE ─────────────────────────────────────
+      let micOn = false,
+        camOn = false,
+        screenSharing = false;
+      let lobbyMicOn = false,
+        lobbyCamOn = false;
+      let recording = false,
+        handRaised = false;
+      let callSeconds = 0,
+        timerInterval = null;
+
+      // ── LOBBY CONTROLS ────────────────────────────
+      function toggleLobbyMic() {
+        lobbyMicOn = !lobbyMicOn;
+        const btn = document.getElementById("lobbyMicBtn");
+        const icon = document.getElementById("lobbyMicIcon");
+        btn.classList.toggle("off", !lobbyMicOn);
+        icon.className = lobbyMicOn
+          ? "fas fa-microphone"
+          : "fas fa-microphone-slash";
+      }
+
+      function toggleLobbyCam() {
+        lobbyCamOn = !lobbyCamOn;
+        const btn = document.getElementById("lobbyCamBtn");
+        const icon = document.getElementById("lobbyCamIcon");
+        const prev = document.getElementById("lobbyPreview");
+        const lbl = document.getElementById("camLabel");
+        btn.classList.toggle("off", !lobbyCamOn);
+        icon.className = lobbyCamOn ? "fas fa-video" : "fas fa-video-slash";
+        prev.style.background = lobbyCamOn
+          ? "linear-gradient(135deg,#1d3557,#0d6efd)"
+          : "#0d0d10";
+        lbl.textContent = lobbyCamOn ? "Camera is on" : "Camera is off";
+      }
+
+      function toggleLobbyBg() {
+        const preview = document.getElementById("lobbyPreview");
+        const bgs = [
+          "#0d0d10",
+          "linear-gradient(135deg,#1d3557,#0d6efd)",
+          "linear-gradient(135deg,#064e3b,#065f46)",
+          "linear-gradient(135deg,#1e1b4b,#312e81)",
+        ];
+        const idx = Math.floor(Math.random() * bgs.length);
+        preview.style.background = bgs[idx];
+      }
+
+      // ── JOIN / START CALL ─────────────────────────
+      function joinMeeting() {
+        const id = document.getElementById("meetingIdInput").value.trim();
+        if (!id) {
+          alert("Please enter a Meeting ID.");
+          return;
+        }
+        startCall();
+      }
+
+      function startCall() {
+        micOn = lobbyMicOn;
+        camOn = lobbyCamOn;
+        document.getElementById("preCallScreen").style.display = "none";
+        document.getElementById("callScreen").style.display = "block";
+        updateMicUI();
+        updateCamUI();
+        timerInterval = setInterval(() => {
+          callSeconds++;
+          const m = String(Math.floor(callSeconds / 60)).padStart(2, "0");
+          const s = String(callSeconds % 60).padStart(2, "0");
+          document.getElementById("callTimer").textContent = `${m}:${s}`;
+        }, 1000);
+      }
+
+      // ── CALL CONTROLS ─────────────────────────────
+      function toggleMic() {
+        micOn = !micOn;
+        updateMicUI();
+        document.getElementById("myStatus").textContent = micOn
+          ? "Live"
+          : "Muted";
+        document.getElementById("myStatus").className =
+          "p-status " + (micOn ? "speaking" : "muted");
+      }
+
+      function updateMicUI() {
+        const btn = document.getElementById("micBtn");
+        const icon = document.getElementById("micIcon");
+        const mute = document.getElementById("selfMutedIcon");
+        btn.classList.toggle("active", micOn);
+        icon.className = micOn
+          ? "fas fa-microphone"
+          : "fas fa-microphone-slash";
+        mute.classList.toggle("show", !micOn);
+      }
+
+      function toggleCam() {
+        camOn = !camOn;
+        updateCamUI();
+      }
+
+      function updateCamUI() {
+        const btn = document.getElementById("camBtn");
+        const icon = document.getElementById("camIcon");
+        const tile = document.getElementById("selfTile");
+        btn.classList.toggle("active", camOn);
+        icon.className = camOn ? "fas fa-video" : "fas fa-video-slash";
+        tile.style.background = camOn
+          ? "linear-gradient(135deg,#1d3557,#0d6efd)"
+          : "#0d0d10";
+      }
+
+      function toggleScreenShare() {
+        screenSharing = !screenSharing;
+        const btn = document.getElementById("screenBtn");
+        const banner = document.getElementById("screenShareBanner");
+        btn.classList.toggle("active", screenSharing);
+        banner.classList.toggle("show", screenSharing);
+      }
+
+      function toggleRecording() {
+        recording = !recording;
+        const btn = document.getElementById("recBtn");
+        const icon = document.getElementById("recIcon");
+        btn.classList.toggle("active", recording);
+        icon.style.color = recording ? "white" : "var(--accent-red)";
+        addSystemMessage(
+          recording ? "🔴 Recording started" : "⏹ Recording stopped",
+        );
+      }
+
+      function toggleHand() {
+        handRaised = !handRaised;
+        const btn = document.getElementById("handBtn");
+        btn.classList.toggle("active", handRaised);
+        if (handRaised) addSystemMessage("✋ You raised your hand");
+      }
+
+      // ── END CALL ──────────────────────────────────
+      function endCall() {
+        clearInterval(timerInterval);
+        callSeconds = 0;
+        document.getElementById("callTimer").textContent = "00:00";
+        screenSharing = false;
+        document.getElementById("screenShareBanner").classList.remove("show");
+        document.getElementById("preCallScreen").style.display = "block";
+        document.getElementById("callScreen").style.display = "none";
+      }
+
+      // ── CHAT ──────────────────────────────────────
+      function sendChat() {
+        const input = document.getElementById("chatInput");
+        const msg = input.value.trim();
+        if (!msg) return;
+        const box = document.getElementById("chatBox");
+        box.innerHTML += `<div class="chat-msg"><span class="sender" style="color:var(--accent-green)">You</span>${msg}</div>`;
+        input.value = "";
+        box.scrollTop = box.scrollHeight;
+
+        // Simulated reply
+        setTimeout(() => {
+          const replies = [
+            "Understood, noted!",
+            "Can you elaborate?",
+            "That sounds great!",
+            "Let me check that.",
+            "Agreed 👍",
+          ];
+          const reply = replies[Math.floor(Math.random() * replies.length)];
+          box.innerHTML += `<div class="chat-msg"><span class="sender">TechFlow AI</span>${reply}</div>`;
+          box.scrollTop = box.scrollHeight;
+        }, 1200);
+      }
+
+      function addSystemMessage(text) {
+        const box = document.getElementById("chatBox");
+        box.innerHTML += `<div class="chat-msg system"><span class="sender">System</span>${text}</div>`;
+        box.scrollTop = box.scrollHeight;
+      }
+    </script>
+  </body>
+</html>

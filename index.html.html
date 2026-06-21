@@ -1,0 +1,1347 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NEXUS | Dashboard</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      :root {
+        --bg-main: #0a0a0c;
+        --bg-surface: #121216;
+        --bg-surface-elevated: #1a1a22;
+        --border-color: rgba(255, 255, 255, 0.07);
+        --text-primary: #f3f4f6;
+        --text-secondary: #9ca3af;
+        --accent-blue: #0d6efd;
+        --accent-blue-hover: #0b5ed7;
+        --accent-green: #10b981;
+        --accent-orange: #f59e0b;
+        --accent-purple: #8b5cf6;
+        --glass-bg: rgba(18, 18, 22, 0.85);
+        --shadow-premium: 0 20px 40px rgba(0, 0, 0, 0.4);
+        --transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        --sidebar-width: 240px;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: var(--bg-main);
+        color: var(--text-primary);
+        min-height: 100vh;
+        display: flex;
+      }
+
+      /* ── SIDEBAR ─────────────────────────────── */
+      .sidebar {
+        width: var(--sidebar-width);
+        min-height: 100vh;
+        background: var(--bg-surface);
+        border-right: 1px solid var(--border-color);
+        position: fixed;
+        top: 0;
+        left: 0;
+        display: flex;
+        flex-direction: column;
+        padding: 24px 0;
+        z-index: 999;
+      }
+
+      .sidebar-logo {
+        padding: 0 24px 32px;
+        font-size: 1.4rem;
+        font-weight: 800;
+        letter-spacing: 2px;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 16px;
+      }
+
+      .sidebar-logo span {
+        color: var(--accent-blue);
+      }
+
+      .sidebar-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--text-secondary);
+        padding: 8px 24px;
+        margin-bottom: 4px;
+      }
+
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 24px;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
+        border-left: 3px solid transparent;
+      }
+
+      .nav-item:hover {
+        background: var(--bg-surface-elevated);
+        color: var(--text-primary);
+      }
+      .nav-item.active {
+        color: var(--accent-blue);
+        border-left-color: var(--accent-blue);
+        background: rgba(13, 110, 253, 0.08);
+      }
+      .nav-item i {
+        width: 18px;
+        text-align: center;
+      }
+
+      .sidebar-divider {
+        border: none;
+        border-top: 1px solid var(--border-color);
+        margin: 16px 0;
+      }
+
+      .role-badge-sidebar {
+        margin: 16px;
+        padding: 12px 16px;
+        border-radius: 10px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .role-badge-sidebar.investor {
+        background: rgba(16, 185, 129, 0.12);
+        color: var(--accent-green);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+      }
+      .role-badge-sidebar.entrepreneur {
+        background: rgba(245, 158, 11, 0.12);
+        color: var(--accent-orange);
+        border: 1px solid rgba(245, 158, 11, 0.2);
+      }
+
+      /* ── TOPBAR ──────────────────────────────── */
+      .topbar {
+        position: fixed;
+        top: 0;
+        left: var(--sidebar-width);
+        right: 0;
+        height: 64px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 32px;
+        z-index: 998;
+      }
+
+      .topbar-title {
+        font-size: 1rem;
+        font-weight: 600;
+      }
+      .topbar-title span {
+        color: var(--text-secondary);
+        font-weight: 400;
+      }
+
+      .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .topbar-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background: var(--bg-surface-elevated);
+        border: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        transition: var(--transition);
+        position: relative;
+      }
+
+      .topbar-icon:hover {
+        color: var(--text-primary);
+      }
+
+      .notif-dot {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        width: 7px;
+        height: 7px;
+        background: var(--accent-blue);
+        border-radius: 50%;
+      }
+
+      .avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #0d6efd, #8b5cf6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+      }
+
+      /* ── MAIN CONTENT ────────────────────────── */
+      .main-content {
+        margin-left: var(--sidebar-width);
+        margin-top: 64px;
+        padding: 32px;
+        flex: 1;
+        min-height: calc(100vh - 64px);
+      }
+
+      /* ── ROLE SELECTION OVERLAY ──────────────── */
+      .role-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(10, 10, 12, 0.95);
+        backdrop-filter: blur(12px);
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+      }
+
+      .role-overlay h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        text-align: center;
+      }
+
+      .role-overlay p {
+        color: var(--text-secondary);
+        margin-bottom: 40px;
+        text-align: center;
+      }
+
+      .role-cards {
+        display: flex;
+        gap: 24px;
+      }
+
+      .role-card {
+        width: 280px;
+        background: var(--bg-surface);
+        border: 2px solid var(--border-color);
+        border-radius: 16px;
+        padding: 36px 28px;
+        cursor: pointer;
+        transition: var(--transition);
+        text-align: center;
+      }
+
+      .role-card:hover {
+        transform: translateY(-6px);
+      }
+
+      .role-card.investor-card:hover {
+        border-color: var(--accent-green);
+        box-shadow: 0 0 40px rgba(16, 185, 129, 0.15);
+      }
+      .role-card.entrepreneur-card:hover {
+        border-color: var(--accent-orange);
+        box-shadow: 0 0 40px rgba(245, 158, 11, 0.15);
+      }
+
+      .role-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        margin: 0 auto 20px;
+      }
+
+      .investor-card .role-icon {
+        background: rgba(16, 185, 129, 0.12);
+      }
+      .entrepreneur-card .role-icon {
+        background: rgba(245, 158, 11, 0.12);
+      }
+
+      .role-card h3 {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+      .role-card p {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        line-height: 1.6;
+      }
+
+      .role-btn {
+        display: inline-block;
+        margin-top: 24px;
+        padding: 10px 28px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: var(--transition);
+      }
+
+      .investor-card .role-btn {
+        background: var(--accent-green);
+        color: white;
+      }
+      .entrepreneur-card .role-btn {
+        background: var(--accent-orange);
+        color: white;
+      }
+
+      /* ── STAT CARDS ──────────────────────────── */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        margin-bottom: 28px;
+      }
+
+      .stat-card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 24px;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .stat-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+      }
+
+      .stat-card.blue::before {
+        background: var(--accent-blue);
+      }
+      .stat-card.green::before {
+        background: var(--accent-green);
+      }
+      .stat-card.orange::before {
+        background: var(--accent-orange);
+      }
+      .stat-card.purple::before {
+        background: var(--accent-purple);
+      }
+
+      .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-premium);
+      }
+
+      .stat-label {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 12px;
+      }
+      .stat-value {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 8px;
+      }
+      .stat-change {
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .stat-change.up {
+        color: var(--accent-green);
+      }
+      .stat-change.down {
+        color: #ef4444;
+      }
+
+      .stat-icon {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 1.4rem;
+        opacity: 0.2;
+      }
+
+      /* ── DASHBOARD GRID ──────────────────────── */
+      .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 24px;
+      }
+
+      .card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 24px;
+      }
+
+      .card-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .card-title span {
+        font-size: 0.75rem;
+        color: var(--accent-blue);
+        cursor: pointer;
+        font-weight: 400;
+      }
+
+      /* ── MEETINGS LIST ───────────────────────── */
+      .meeting-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 14px 0;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .meeting-item:last-child {
+        border-bottom: none;
+      }
+
+      .meeting-time {
+        text-align: center;
+        min-width: 52px;
+      }
+
+      .meeting-time .time {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--accent-blue);
+      }
+      .meeting-time .ampm {
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+      }
+
+      .meeting-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      .meeting-info h4 {
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+      .meeting-info p {
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+      }
+
+      .meeting-badge {
+        margin-left: auto;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        flex-shrink: 0;
+      }
+
+      .badge-confirmed {
+        background: rgba(16, 185, 129, 0.12);
+        color: var(--accent-green);
+      }
+      .badge-pending {
+        background: rgba(245, 158, 11, 0.12);
+        color: var(--accent-orange);
+      }
+      .badge-review {
+        background: rgba(139, 92, 246, 0.12);
+        color: var(--accent-purple);
+      }
+
+      /* ── ACTIVITY FEED ───────────────────────── */
+      .activity-item {
+        display: flex;
+        gap: 14px;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .activity-item:last-child {
+        border-bottom: none;
+      }
+
+      .activity-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        flex-shrink: 0;
+      }
+
+      .activity-text h4 {
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 3px;
+      }
+      .activity-text p {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+      }
+
+      /* ── DEALS PIPELINE ──────────────────────── */
+      .pipeline-item {
+        padding: 14px 0;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .pipeline-item:last-child {
+        border-bottom: none;
+      }
+
+      .pipeline-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+
+      .pipeline-header h4 {
+        font-size: 0.88rem;
+        font-weight: 600;
+      }
+      .pipeline-header span {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--accent-green);
+      }
+
+      .pipeline-bar {
+        height: 5px;
+        background: var(--bg-surface-elevated);
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 6px;
+      }
+
+      .pipeline-fill {
+        height: 100%;
+        border-radius: 10px;
+        transition: width 1s ease;
+      }
+
+      .pipeline-meta {
+        font-size: 0.72rem;
+        color: var(--text-secondary);
+      }
+
+      /* ── QUICK ACTIONS ───────────────────────── */
+      .quick-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+
+      .qa-btn {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 16px;
+        background: var(--bg-surface-elevated);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        cursor: pointer;
+        transition: var(--transition);
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        text-decoration: none;
+      }
+
+      .qa-btn:hover {
+        border-color: var(--accent-blue);
+        color: var(--accent-blue);
+      }
+      .qa-btn i {
+        font-size: 1rem;
+      }
+
+      /* ── WALLET MINI CARD ────────────────────── */
+      .wallet-mini {
+        background: linear-gradient(135deg, #1d3557 0%, #0d6efd 100%);
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .wallet-mini::after {
+        content: "";
+        position: absolute;
+        right: -30px;
+        top: -30px;
+        width: 130px;
+        height: 130px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .wallet-mini .wlabel {
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.6);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .wallet-mini .wvalue {
+        font-size: 2rem;
+        font-weight: 800;
+        color: white;
+        margin: 8px 0;
+      }
+      .wallet-mini .wchange {
+        font-size: 0.78rem;
+        color: rgba(255, 255, 255, 0.7);
+      }
+
+      /* ── PAGE HEADER ─────────────────────────── */
+      .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 28px;
+      }
+
+      .page-header h1 {
+        font-size: 1.6rem;
+        font-weight: 700;
+      }
+      .page-header p {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-top: 4px;
+      }
+
+      .header-btn {
+        padding: 10px 20px;
+        background: var(--accent-blue);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: var(--transition);
+      }
+
+      .header-btn:hover {
+        background: var(--accent-blue-hover);
+      }
+
+      /* ── RESPONSIVE ──────────────────────────── */
+      @media (max-width: 1100px) {
+        .stats-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .dashboard-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .sidebar {
+          transform: translateX(-100%);
+        }
+        .main-content {
+          margin-left: 0;
+        }
+        .topbar {
+          left: 0;
+        }
+        .stats-grid {
+          grid-template-columns: 1fr;
+        }
+        .role-cards {
+          flex-direction: column;
+        }
+      }
+
+      /* Scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: var(--bg-main);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--bg-surface-elevated);
+        border-radius: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ═══════════════════════════════════════════
+     ROLE SELECTION OVERLAY
+════════════════════════════════════════════ -->
+    <div class="role-overlay" id="roleOverlay">
+      <h2>Welcome to <span style="color: #0d6efd">NEXUS</span></h2>
+      <p>Select your role to personalize your dashboard experience</p>
+      <div class="role-cards">
+        <div class="role-card investor-card" onclick="selectRole('investor')">
+          <div class="role-icon">💼</div>
+          <h3>Investor</h3>
+          <p>
+            Manage your portfolio, track deals, schedule meetings with
+            entrepreneurs, and monitor ROI.
+          </p>
+          <button class="role-btn">Enter as Investor</button>
+        </div>
+        <div
+          class="role-card entrepreneur-card"
+          onclick="selectRole('entrepreneur')"
+        >
+          <div class="role-icon">🚀</div>
+          <h3>Entrepreneur</h3>
+          <p>
+            Pitch your ideas, connect with investors, manage funding rounds, and
+            track business growth.
+          </p>
+          <button class="role-btn">Enter as Entrepreneur</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+     SIDEBAR
+════════════════════════════════════════════ -->
+    <aside class="sidebar">
+      <div class="sidebar-logo"><span>N</span>EXUS</div>
+
+      <div class="sidebar-label">Main</div>
+      <a class="nav-item active" href="dashboard.html"
+        ><i class="fas fa-th-large"></i> Dashboard</a
+      >
+      <a class="nav-item" href="calendar.html"
+        ><i class="fas fa-calendar-alt"></i> Calendar</a
+      >
+      <a class="nav-item" href="video.html"
+        ><i class="fas fa-video"></i> Video Calls</a
+      >
+      <a class="nav-item" href="documents.html"
+        ><i class="fas fa-file-contract"></i> Documents</a
+      >
+
+      <hr class="sidebar-divider" />
+      <div class="sidebar-label">Finance</div>
+      <a class="nav-item" href="payments.html"
+        ><i class="fas fa-credit-card"></i> Payments</a
+      >
+      <a class="nav-item" href="security.html"
+        ><i class="fas fa-shield-alt"></i> Security</a
+      >
+
+      <hr class="sidebar-divider" />
+      <div class="sidebar-label">Account</div>
+
+      <div id="roleBadgeSidebar"></div>
+    </aside>
+
+    <!-- ═══════════════════════════════════════════
+     TOPBAR
+════════════════════════════════════════════ -->
+    <header class="topbar">
+      <div class="topbar-title">Dashboard <span id="topbarRole"></span></div>
+      <div class="topbar-right">
+        <div class="topbar-icon" title="Notifications">
+          <i class="fas fa-bell"></i>
+          <span class="notif-dot"></span>
+        </div>
+        <div class="topbar-icon" title="Messages">
+          <i class="fas fa-envelope"></i>
+        </div>
+        <div class="avatar" title="Profile">U</div>
+        <button
+          onclick="changeRole()"
+          style="
+            padding: 7px 14px;
+            background: var(--bg-surface-elevated);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: var(--transition);
+          "
+          onmouseover="this.style.color = 'white'"
+          onmouseout="this.style.color = 'var(--text-secondary)'"
+        >
+          Switch Role
+        </button>
+      </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════════
+     MAIN DASHBOARD CONTENT
+════════════════════════════════════════════ -->
+    <main class="main-content">
+      <!-- Page Header -->
+      <div class="page-header">
+        <div>
+          <h1 id="dashTitle">Dashboard</h1>
+          <p id="dashSubtitle">Welcome back! Here's what's happening today.</p>
+        </div>
+        <button class="header-btn" id="mainActionBtn">
+          <i class="fas fa-plus"></i>
+          <span id="mainActionLabel">New Meeting</span>
+        </button>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid" id="statsGrid">
+        <!-- Injected by JS -->
+      </div>
+
+      <!-- Dashboard Grid -->
+      <div class="dashboard-grid">
+        <!-- LEFT COLUMN -->
+        <div>
+          <!-- Quick Actions -->
+          <div class="quick-actions" id="quickActions">
+            <!-- Injected by JS -->
+          </div>
+
+          <!-- Upcoming Meetings -->
+          <div class="card" style="margin-bottom: 24px">
+            <div class="card-title">
+              Upcoming Meetings
+              <span onclick="window.location.href = 'calendar.html'"
+                >View Calendar →</span
+              >
+            </div>
+            <div id="meetingsList">
+              <!-- Injected by JS -->
+            </div>
+          </div>
+
+          <!-- Pipeline / Deals -->
+          <div class="card" id="pipelineCard">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div>
+          <!-- Wallet Summary -->
+          <div class="wallet-mini">
+            <div class="wlabel">Wallet Balance</div>
+            <div class="wvalue" id="walletBalance">$0.00</div>
+            <div class="wchange" id="walletChange">—</div>
+          </div>
+
+          <!-- Activity Feed -->
+          <div class="card">
+            <div class="card-title">
+              Recent Activity
+              <span>See all</span>
+            </div>
+            <div id="activityFeed">
+              <!-- Injected by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      /* ══════════════════════════════════════
+     ROLE-BASED DATA CONFIG
+  ══════════════════════════════════════ */
+      const ROLE_DATA = {
+        investor: {
+          title: "Investor Dashboard",
+          subtitle: "Track your portfolio, meetings, and deal flow.",
+          actionLabel: "New Meeting",
+          walletBalance: "$248,500.00",
+          walletChange: "↑ +$12,300 this month",
+          stats: [
+            {
+              label: "Portfolio Value",
+              value: "$2.4M",
+              change: "+8.2%",
+              dir: "up",
+              icon: "fa-chart-line",
+              color: "blue",
+            },
+            {
+              label: "Active Deals",
+              value: "14",
+              change: "+3 this week",
+              dir: "up",
+              icon: "fa-handshake",
+              color: "green",
+            },
+            {
+              label: "Meetings Today",
+              value: "5",
+              change: "2 pending",
+              dir: "up",
+              icon: "fa-calendar-check",
+              color: "purple",
+            },
+            {
+              label: "ROI (YTD)",
+              value: "34%",
+              change: "+6% vs last yr",
+              dir: "up",
+              icon: "fa-percent",
+              color: "orange",
+            },
+          ],
+          quickActions: [
+            {
+              icon: "fa-calendar-plus",
+              label: "Schedule Meeting",
+              href: "calendar.html",
+            },
+            { icon: "fa-video", label: "Start Video Call", href: "video.html" },
+            {
+              icon: "fa-file-signature",
+              label: "Review Contract",
+              href: "documents.html",
+            },
+            { icon: "fa-wallet", label: "Fund a Deal", href: "payments.html" },
+          ],
+          meetings: [
+            {
+              time: "09:30",
+              ampm: "AM",
+              title: "Pitch: TechFlow AI",
+              sub: "Series A · Zoom call",
+              dot: "#0d6efd",
+              badge: "Confirmed",
+              badgeClass: "badge-confirmed",
+            },
+            {
+              time: "11:00",
+              ampm: "AM",
+              title: "Portfolio Review",
+              sub: "Internal · Board room",
+              dot: "#8b5cf6",
+              badge: "Confirmed",
+              badgeClass: "badge-confirmed",
+            },
+            {
+              time: "02:00",
+              ampm: "PM",
+              title: "Due Diligence: GreenX",
+              sub: "Legal · Document review",
+              dot: "#f59e0b",
+              badge: "Pending",
+              badgeClass: "badge-pending",
+            },
+            {
+              time: "04:30",
+              ampm: "PM",
+              title: "NDA Signing: NovaMed",
+              sub: "Contract · e-Signature",
+              dot: "#10b981",
+              badge: "Review",
+              badgeClass: "badge-review",
+            },
+          ],
+          pipeline: {
+            title: "Deal Pipeline",
+            items: [
+              {
+                name: "TechFlow AI — Series A",
+                amount: "$500K",
+                pct: 78,
+                color: "#0d6efd",
+                meta: "Due diligence phase · Closes Jun 30",
+              },
+              {
+                name: "GreenX Energy — Seed",
+                amount: "$150K",
+                pct: 45,
+                color: "#10b981",
+                meta: "Term sheet sent · Waiting response",
+              },
+              {
+                name: "NovaMed Health — Pre-A",
+                amount: "$320K",
+                pct: 92,
+                color: "#8b5cf6",
+                meta: "Final NDA · Ready to close",
+              },
+            ],
+          },
+          activity: [
+            {
+              icon: "fa-file-signature",
+              bg: "rgba(139,92,246,0.12)",
+              color: "#8b5cf6",
+              title: "Contract sent to TechFlow AI",
+              time: "2 hours ago",
+            },
+            {
+              icon: "fa-video",
+              bg: "rgba(13,110,253,0.12)",
+              color: "#0d6efd",
+              title: "Video call with GreenX completed",
+              time: "4 hours ago",
+            },
+            {
+              icon: "fa-dollar-sign",
+              bg: "rgba(16,185,129,0.12)",
+              color: "#10b981",
+              title: "Deposit of $50K confirmed",
+              time: "Yesterday",
+            },
+            {
+              icon: "fa-calendar-check",
+              bg: "rgba(245,158,11,0.12)",
+              color: "#f59e0b",
+              title: "Meeting with NovaMed scheduled",
+              time: "Yesterday",
+            },
+            {
+              icon: "fa-shield-alt",
+              bg: "rgba(239,68,68,0.12)",
+              color: "#ef4444",
+              title: "2FA login from new device",
+              time: "2 days ago",
+            },
+          ],
+          badgeClass: "investor",
+          badgeIcon: "💼",
+          badgeText: "Investor Mode",
+        },
+
+        entrepreneur: {
+          title: "Entrepreneur Dashboard",
+          subtitle: "Manage pitches, investor relations, and funding rounds.",
+          actionLabel: "New Pitch",
+          walletBalance: "$38,200.00",
+          walletChange: "↑ +$5,000 funding received",
+          stats: [
+            {
+              label: "Funding Raised",
+              value: "$385K",
+              change: "+$50K this month",
+              dir: "up",
+              icon: "fa-rocket",
+              color: "orange",
+            },
+            {
+              label: "Investor Meetings",
+              value: "8",
+              change: "3 this week",
+              dir: "up",
+              icon: "fa-handshake",
+              color: "blue",
+            },
+            {
+              label: "Open Deals",
+              value: "3",
+              change: "1 closing soon",
+              dir: "up",
+              icon: "fa-file-contract",
+              color: "purple",
+            },
+            {
+              label: "Pitch Score",
+              value: "87/100",
+              change: "+5 pts",
+              dir: "up",
+              icon: "fa-star",
+              color: "green",
+            },
+          ],
+          quickActions: [
+            {
+              icon: "fa-presentation-screen",
+              label: "Upload Pitch Deck",
+              href: "documents.html",
+            },
+            {
+              icon: "fa-calendar-plus",
+              label: "Request Meeting",
+              href: "calendar.html",
+            },
+            { icon: "fa-video", label: "Join Video Call", href: "video.html" },
+            {
+              icon: "fa-file-invoice-dollar",
+              label: "View Transactions",
+              href: "payments.html",
+            },
+          ],
+          meetings: [
+            {
+              time: "10:00",
+              ampm: "AM",
+              title: "Pitch to Nexus Capital",
+              sub: "Series A · Video call",
+              dot: "#10b981",
+              badge: "Confirmed",
+              badgeClass: "badge-confirmed",
+            },
+            {
+              time: "01:00",
+              ampm: "PM",
+              title: "Term Sheet Review",
+              sub: "Legal · Document chamber",
+              dot: "#8b5cf6",
+              badge: "Review",
+              badgeClass: "badge-review",
+            },
+            {
+              time: "03:30",
+              ampm: "PM",
+              title: "Investor Q&A Session",
+              sub: "Open round · 4 investors",
+              dot: "#0d6efd",
+              badge: "Pending",
+              badgeClass: "badge-pending",
+            },
+          ],
+          pipeline: {
+            title: "Funding Rounds",
+            items: [
+              {
+                name: "Pre-Seed Round",
+                amount: "$150K",
+                pct: 100,
+                color: "#10b981",
+                meta: "Closed · Fully funded ✓",
+              },
+              {
+                name: "Seed Round",
+                amount: "$385K / $500K",
+                pct: 77,
+                color: "#0d6efd",
+                meta: "Active · 3 investors committed",
+              },
+              {
+                name: "Series A (Target)",
+                amount: "$2M",
+                pct: 12,
+                color: "#f59e0b",
+                meta: "Early stage · 1 lead interested",
+              },
+            ],
+          },
+          activity: [
+            {
+              icon: "fa-handshake",
+              bg: "rgba(16,185,129,0.12)",
+              color: "#10b981",
+              title: "Nexus Capital accepted your pitch",
+              time: "1 hour ago",
+            },
+            {
+              icon: "fa-file-signature",
+              bg: "rgba(139,92,246,0.12)",
+              color: "#8b5cf6",
+              title: "Term sheet received for review",
+              time: "3 hours ago",
+            },
+            {
+              icon: "fa-dollar-sign",
+              bg: "rgba(13,110,253,0.12)",
+              color: "#0d6efd",
+              title: "$50K tranche deposited to wallet",
+              time: "Today",
+            },
+            {
+              icon: "fa-video",
+              bg: "rgba(245,158,11,0.12)",
+              color: "#f59e0b",
+              title: "Investor call scheduled for tomorrow",
+              time: "Yesterday",
+            },
+            {
+              icon: "fa-lock",
+              bg: "rgba(239,68,68,0.12)",
+              color: "#ef4444",
+              title: "Password updated successfully",
+              time: "3 days ago",
+            },
+          ],
+          badgeClass: "entrepreneur",
+          badgeIcon: "🚀",
+          badgeText: "Entrepreneur Mode",
+        },
+      };
+
+      /* ══════════════════════════════════════
+     ROLE SELECTION
+  ══════════════════════════════════════ */
+      let currentRole = localStorage.getItem("nexusRole") || null;
+
+      function selectRole(role) {
+        currentRole = role;
+        localStorage.setItem("nexusRole", role);
+        document.getElementById("roleOverlay").style.display = "none";
+        renderDashboard(role);
+      }
+
+      function changeRole() {
+        document.getElementById("roleOverlay").style.display = "flex";
+      }
+
+      function renderDashboard(role) {
+        const d = ROLE_DATA[role];
+
+        // Titles
+        document.getElementById("dashTitle").textContent = d.title;
+        document.getElementById("dashSubtitle").textContent = d.subtitle;
+        document.getElementById("mainActionLabel").textContent = d.actionLabel;
+        document.getElementById("topbarRole").textContent =
+          `/ ${role.charAt(0).toUpperCase() + role.slice(1)}`;
+
+        // Wallet
+        document.getElementById("walletBalance").textContent = d.walletBalance;
+        document.getElementById("walletChange").textContent = d.walletChange;
+
+        // Role badge sidebar
+        document.getElementById("roleBadgeSidebar").innerHTML = `
+      <div class="role-badge-sidebar ${d.badgeClass}">
+        <span>${d.badgeIcon}</span>
+        <span>${d.badgeText}</span>
+      </div>`;
+
+        // Stats
+        document.getElementById("statsGrid").innerHTML = d.stats
+          .map(
+            (s) => `
+      <div class="stat-card ${s.color}">
+        <i class="fas ${s.icon} stat-icon"></i>
+        <div class="stat-label">${s.label}</div>
+        <div class="stat-value">${s.value}</div>
+        <div class="stat-change ${s.dir}">
+          <i class="fas fa-arrow-${s.dir}"></i> ${s.change}
+        </div>
+      </div>`,
+          )
+          .join("");
+
+        // Quick Actions
+        document.getElementById("quickActions").innerHTML = d.quickActions
+          .map(
+            (q) => `
+      <a class="qa-btn" href="${q.href}">
+        <i class="fas ${q.icon}" style="color:var(--accent-blue)"></i>
+        ${q.label}
+      </a>`,
+          )
+          .join("");
+
+        // Meetings
+        document.getElementById("meetingsList").innerHTML = d.meetings
+          .map(
+            (m) => `
+      <div class="meeting-item">
+        <div class="meeting-time">
+          <div class="time">${m.time}</div>
+          <div class="ampm">${m.ampm}</div>
+        </div>
+        <div class="meeting-dot" style="background:${m.dot}"></div>
+        <div class="meeting-info">
+          <h4>${m.title}</h4>
+          <p>${m.sub}</p>
+        </div>
+        <span class="meeting-badge ${m.badgeClass}">${m.badge}</span>
+      </div>`,
+          )
+          .join("");
+
+        // Pipeline
+        document.getElementById("pipelineCard").innerHTML = `
+      <div class="card-title">${d.pipeline.title} <span>See all</span></div>
+      ${d.pipeline.items
+        .map(
+          (p) => `
+        <div class="pipeline-item">
+          <div class="pipeline-header">
+            <h4>${p.name}</h4>
+            <span>${p.amount}</span>
+          </div>
+          <div class="pipeline-bar">
+            <div class="pipeline-fill" style="width:${p.pct}%;background:${p.color}"></div>
+          </div>
+          <div class="pipeline-meta">${p.meta}</div>
+        </div>`,
+        )
+        .join("")}`;
+
+        // Activity
+        document.getElementById("activityFeed").innerHTML = d.activity
+          .map(
+            (a) => `
+      <div class="activity-item">
+        <div class="activity-icon" style="background:${a.bg};color:${a.color}">
+          <i class="fas ${a.icon}"></i>
+        </div>
+        <div class="activity-text">
+          <h4>${a.title}</h4>
+          <p>${a.time}</p>
+        </div>
+      </div>`,
+          )
+          .join("");
+      }
+
+      // Init on load
+      if (currentRole) {
+        document.getElementById("roleOverlay").style.display = "none";
+        renderDashboard(currentRole);
+      }
+    </script>
+  </body>
+</html>
